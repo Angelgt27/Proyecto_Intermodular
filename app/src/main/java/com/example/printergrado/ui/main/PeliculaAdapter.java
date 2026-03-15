@@ -43,18 +43,17 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
         String info = pelicula.getGenero() + " • " + pelicula.getDuracion() + " min\n" + pelicula.getSinopsis();
         holder.tvDescripcion.setText(info);
 
-        // ¡AQUÍ ESTÁ LA MAGIA DEL CLIC!
         holder.btnReservar.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, ReservaActivity.class);
 
-            // Empaquetamos los datos de la película
+            // --- AÑADIDO: Enviamos el ID real de la película ---
+            intent.putExtra("ID_PELICULA", pelicula.getIdPelicula());
             intent.putExtra("TITULO", pelicula.getTitulo());
             intent.putExtra("GENERO", pelicula.getGenero());
             intent.putExtra("DURACION", pelicula.getDuracion());
             intent.putExtra("SINOPSIS", pelicula.getSinopsis());
 
-            // Iniciamos la pantalla de reserva
             context.startActivity(intent);
         });
     }
@@ -66,13 +65,13 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
 
     static class PeliculaViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitulo, tvDescripcion;
-        MaterialButton btnReservar; // Añadido el botón
+        MaterialButton btnReservar;
 
         public PeliculaViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTitulo = itemView.findViewById(R.id.tvTituloPelicula);
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionPelicula);
-            btnReservar = itemView.findViewById(R.id.btnReservarItem); // Enlazado con el XML
+            btnReservar = itemView.findViewById(R.id.btnReservarItem);
         }
     }
 }

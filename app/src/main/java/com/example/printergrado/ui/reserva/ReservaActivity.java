@@ -33,6 +33,7 @@ public class ReservaActivity extends AppCompatActivity {
     private MaterialButton btnComprar;
 
     private int cantidadEntradas = 1;
+    private int idSesionSeleccionada = 1; // <--- NUEVA VARIABLE GLOBAL
     private ReservaViewModel reservaViewModel;
 
     @Override
@@ -65,6 +66,9 @@ public class ReservaActivity extends AppCompatActivity {
 
         // Cargar datos del Intent
         if (getIntent() != null) {
+            // --- AÑADIDO: Leemos el ID real (Si falla, usa el 1) ---
+            idSesionSeleccionada = getIntent().getIntExtra("ID_PELICULA", 1);
+
             String titulo = getIntent().getStringExtra("TITULO");
             if (titulo != null) tvTitulo.setText(titulo);
 
@@ -104,23 +108,19 @@ public class ReservaActivity extends AppCompatActivity {
 
         reservaViewModel.getReservaExitosa().observe(this, exitosa -> {
             if (exitosa != null && exitosa) {
-                // Si la reserva va bien, cerramos esta pantalla y volvemos a la lista
                 finish();
             }
         });
 
         // Lógica del botón Comprar
         btnComprar.setOnClickListener(v -> {
-            // 1. Recuperamos el token de las preferencias
             SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
             String token = prefs.getString("jwt_token", null);
 
             if (token != null) {
-                // 2. Formateamos el token (Bearer token)
                 String authHeader = "Bearer " + token;
-
-                // 3. Enviamos la petición. Por ahora hardcodeamos ID Sesion = 1
-                reservaViewModel.hacerReserva(authHeader, 1, cantidadEntradas);
+                // --- ARREGLADO: Ya no está hardcodeado a 1 ---
+                reservaViewModel.hacerReserva(authHeader, idSesionSeleccionada, cantidadEntradas);
             } else {
                 Toast.makeText(this, "Error: No has iniciado sesión", Toast.LENGTH_SHORT).show();
             }

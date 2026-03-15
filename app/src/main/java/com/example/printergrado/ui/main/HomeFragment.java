@@ -30,7 +30,7 @@ public class HomeFragment extends Fragment {
         RecyclerView rv = view.findViewById(R.id.rvPeliculas);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshHome);
 
-        // ¡Pintamos la rueda de rojo para que haga juego con tu app!
+        // Color de la rueda de carga
         swipeRefreshLayout.setColorSchemeResources(R.color.rojo_cine);
 
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -39,19 +39,26 @@ public class HomeFragment extends Fragment {
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        // Cuando el usuario desliza el dedo hacia abajo, pedimos a Flask las películas de nuevo
+        // Evento al deslizar el dedo hacia abajo
         swipeRefreshLayout.setOnRefreshListener(() -> {
             mainViewModel.cargarPeliculas();
         });
 
-        // Mostrar la rueda la primera vez
-        swipeRefreshLayout.setRefreshing(true);
+        // --- SOLUCIÓN AL PARPADEO ---
+        // Solo mostramos la rueda automáticamente si NO tenemos películas guardadas en memoria
+        if (mainViewModel.getPeliculas().getValue() == null) {
+            swipeRefreshLayout.setRefreshing(true);
+        }
 
+        // Observador de películas
         mainViewModel.getPeliculas().observe(getViewLifecycleOwner(), peliculas -> {
             swipeRefreshLayout.setRefreshing(false); // Ocultamos la rueda
-            if (peliculas != null) adapter.setPeliculas(peliculas);
+            if (peliculas != null) {
+                adapter.setPeliculas(peliculas);
+            }
         });
 
+        // Observador de errores
         mainViewModel.getMensajes().observe(getViewLifecycleOwner(), msj -> {
             if (msj != null) {
                 swipeRefreshLayout.setRefreshing(false); // Ocultamos la rueda si hay error

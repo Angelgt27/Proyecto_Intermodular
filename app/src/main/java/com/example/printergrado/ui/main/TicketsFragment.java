@@ -36,6 +36,7 @@ public class TicketsFragment extends Fragment {
         layoutVacioTickets = view.findViewById(R.id.layoutVacioTickets);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshTickets);
 
+        // Color de la rueda de carga
         swipeRefreshLayout.setColorSchemeResources(R.color.rojo_cine);
 
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -43,6 +44,7 @@ public class TicketsFragment extends Fragment {
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("jwt_token", null);
 
+        // Configurar adaptador y acción de eliminar
         adapter = new TicketAdapter(idSesion -> {
             swipeRefreshLayout.setRefreshing(true);
             mainViewModel.eliminarTicket("Bearer " + token, idSesion);
@@ -52,11 +54,12 @@ public class TicketsFragment extends Fragment {
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        // Cuando el usuario desliza, volvemos a pedir los tickets
+        // Evento al deslizar el dedo hacia abajo
         swipeRefreshLayout.setOnRefreshListener(() -> {
             mainViewModel.cargarTickets("Bearer " + token);
         });
 
+        // Observador de tickets
         mainViewModel.getTickets().observe(getViewLifecycleOwner(), tickets -> {
             swipeRefreshLayout.setRefreshing(false); // Ocultar rueda
 
@@ -73,10 +76,15 @@ public class TicketsFragment extends Fragment {
             }
         });
 
-        swipeRefreshLayout.setRefreshing(true);
-        layoutVacioTickets.setVisibility(View.GONE);
-        rv.setVisibility(View.GONE);
+        // --- SOLUCIÓN AL PARPADEO ---
+        // Solo ocultamos la pantalla y mostramos la rueda si es la primera vez que cargamos
+        if (mainViewModel.getTickets().getValue() == null) {
+            swipeRefreshLayout.setRefreshing(true);
+            layoutVacioTickets.setVisibility(View.GONE);
+            rv.setVisibility(View.GONE);
+        }
 
+        // Pedimos los tickets a la API por debajo (actualización silenciosa)
         mainViewModel.cargarTickets("Bearer " + token);
 
         return view;

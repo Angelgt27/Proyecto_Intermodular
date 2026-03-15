@@ -77,8 +77,9 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_tickets) {
                 selectedFragment = new TicketsFragment();
+            } else if (itemId == R.id.nav_profile) {
+                selectedFragment = new ProfileFragment(); // Pestaña de Perfil integrada
             }
-            // (Aquí añadiremos Perfil y Ajustes en el futuro)
 
             if (selectedFragment != null) {
                 getSupportFragmentManager()
