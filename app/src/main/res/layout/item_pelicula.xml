@@ -15,11 +15,11 @@
         android:layout_height="120dp"
         android:background="@color/gris_claro_borde"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_wip"
+        android:src="@drawable/ic_image_wip"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:src="@drawable/ic_wip" />
+        tools:src="@drawable/ic_image_wip"/>
     <TextView
         android:id="@+id/tvTituloPelicula"
         android:layout_width="0dp"

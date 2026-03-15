@@ -4,12 +4,15 @@ import com.example.printergrado.data.model.AuthResponse;
 import com.example.printergrado.data.model.LoginRequest;
 import com.example.printergrado.data.model.RegistroRequest;
 import com.example.printergrado.data.model.Pelicula;
+import com.example.printergrado.data.model.ReservaRequest;
+import com.example.printergrado.data.model.ReservaResponse;
 
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface ApiService {
@@ -22,4 +25,10 @@ public interface ApiService {
 
     @GET("api/peliculas")
     Call<List<Pelicula>> getPeliculas();
+
+    @POST("api/reservas")
+    Call<ReservaResponse> crearReserva(
+            @Header("Authorization") String token,
+            @Body ReservaRequest request
+    );
 }
