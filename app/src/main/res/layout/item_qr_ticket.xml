@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:background="@color/blanco"
+    android:elevation="2dp"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/ivQRWIP"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@color/gris_claro_borde"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_image_wip"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvQRTitulo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Título"
+        android:textColor="@color/negro"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivQRWIP"
+        app:layout_constraintTop_toTopOf="@id/ivQRWIP" />
+
+    <TextView
+        android:id="@+id/tvQRInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Fecha: \nHora: "
+        android:textColor="@color/gris_oscuro"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tvQRTitulo"
+        app:layout_constraintTop_toBottomOf="@id/tvQRTitulo" />
+
+    <TextView
+        android:id="@+id/tvQRNumero"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Entrada 1"
+        android:textColor="@color/rojo_cine"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tvQRTitulo"
+        app:layout_constraintTop_toBottomOf="@id/tvQRInfo" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

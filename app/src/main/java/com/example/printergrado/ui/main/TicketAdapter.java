@@ -55,7 +55,12 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
         // --------------------------------
 
         holder.btnVer.setOnClickListener(v -> {
-            Toast.makeText(v.getContext(), "Mostrando entrada...", Toast.LENGTH_SHORT).show();
+            android.content.Intent intent = new android.content.Intent(v.getContext(), TicketDetailActivity.class);
+            intent.putExtra("TITULO", ticket.getTitulo());
+            intent.putExtra("FECHA", ticket.getFecha());
+            intent.putExtra("HORA", ticket.getHora());
+            intent.putExtra("CANTIDAD", ticket.getCantidadTickets());
+            v.getContext().startActivity(intent);
         });
 
         holder.btnEliminar.setOnClickListener(v -> {
