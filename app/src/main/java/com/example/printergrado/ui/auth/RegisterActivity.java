@@ -40,6 +40,12 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+        authViewModel.getAuthSuccess().observe(this, success -> {
+            if (success != null && success) {
+                finish();
+            }
+        });
+
         // Eventos de click
         btnCrearCuenta.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
