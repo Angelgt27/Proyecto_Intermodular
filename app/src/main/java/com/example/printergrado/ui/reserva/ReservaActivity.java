@@ -18,22 +18,18 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.printergrado.R;
 import com.example.printergrado.viewmodel.ReservaViewModel;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
 public class ReservaActivity extends AppCompatActivity {
 
-    private View barraSuperior;
-    private BottomNavigationView bottomNav;
-
     // Vistas
-    private TextView tvTitulo, tvGenero, tvDuracion, tvSinopsis, tvCantidad;
+    private TextView tvTitulo, tvGenero, tvDuracion, tvSinopsis, tvCantidad, btnVolver;
     private AutoCompleteTextView spinnerCine;
     private ImageButton btnMenos, btnMas;
     private MaterialButton btnComprar;
 
     private int cantidadEntradas = 1;
-    private int idSesionSeleccionada = 1; // <--- NUEVA VARIABLE GLOBAL
+    private int idSesionSeleccionada = 1;
     private ReservaViewModel reservaViewModel;
 
     @Override
@@ -43,8 +39,7 @@ public class ReservaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reserva);
 
         // Enlazar vistas
-        barraSuperior = findViewById(R.id.barraSuperiorReserva);
-        bottomNav = findViewById(R.id.bottomNavigationReserva);
+        btnVolver = findViewById(R.id.btnVolverReserva);
         tvTitulo = findViewById(R.id.tvTituloReserva);
         tvGenero = findViewById(R.id.tvGeneroReserva);
         tvDuracion = findViewById(R.id.tvDuracionReserva);
@@ -55,18 +50,20 @@ public class ReservaActivity extends AppCompatActivity {
         tvCantidad = findViewById(R.id.tvCantidadEntradas);
         btnComprar = findViewById(R.id.btnComprar);
 
-        // Gestionar Insets
+        // Gestionar Insets (Misma lógica que TicketDetailActivity para bajar la barra)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            barraSuperior.getLayoutParams().height = insets.top;
-            barraSuperior.requestLayout();
-            bottomNav.setPadding(0, 0, 0, insets.bottom);
+            View barraSuperior = findViewById(R.id.barraSuperiorReserva);
+            barraSuperior.setPadding(0, insets.top, 0, 0);
+            barraSuperior.getLayoutParams().height = insets.top + (int)(60 * getResources().getDisplayMetrics().density);
             return windowInsets;
         });
 
+        // Evento Botón Volver
+        btnVolver.setOnClickListener(v -> finish());
+
         // Cargar datos del Intent
         if (getIntent() != null) {
-            // --- AÑADIDO: Leemos el ID real (Si falla, usa el 1) ---
             idSesionSeleccionada = getIntent().getIntExtra("ID_PELICULA", 1);
 
             String titulo = getIntent().getStringExtra("TITULO");
@@ -108,7 +105,7 @@ public class ReservaActivity extends AppCompatActivity {
 
         reservaViewModel.getReservaExitosa().observe(this, exitosa -> {
             if (exitosa != null && exitosa) {
-                finish();
+                finish(); // Volvemos a la cartelera si la compra sale bien
             }
         });
 
@@ -119,7 +116,6 @@ public class ReservaActivity extends AppCompatActivity {
 
             if (token != null) {
                 String authHeader = "Bearer " + token;
-                // --- ARREGLADO: Ya no está hardcodeado a 1 ---
                 reservaViewModel.hacerReserva(authHeader, idSesionSeleccionada, cantidadEntradas);
             } else {
                 Toast.makeText(this, "Error: No has iniciado sesión", Toast.LENGTH_SHORT).show();
