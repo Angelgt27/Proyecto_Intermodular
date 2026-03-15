@@ -10,6 +10,7 @@ import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.data.model.ReservaResponse;
 import com.example.printergrado.data.model.Ticket;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -51,10 +52,17 @@ public class MainViewModel extends ViewModel {
             public void onResponse(Call<List<Ticket>> call, Response<List<Ticket>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     ticketsLiveData.setValue(response.body());
+                } else {
+                    // Si el servidor da error, enviamos lista vacía para que quite la rueda
+                    ticketsLiveData.setValue(new ArrayList<>());
                 }
             }
             @Override
-            public void onFailure(Call<List<Ticket>> call, Throwable t) {}
+            public void onFailure(Call<List<Ticket>> call, Throwable t) {
+                // Si no hay red, también pasamos lista vacía y avisamos
+                ticketsLiveData.setValue(new ArrayList<>());
+                mensajeLiveData.setValue("Problema de conexión al buscar entradas");
+            }
         });
     }
 
