@@ -27,19 +27,15 @@ public class ReservaViewModel extends ViewModel {
     public LiveData<Boolean> getReservaExitosa() { return reservaExitosa; }
 
     public void hacerReserva(String token, int idSesion, int cantidadEntradas) {
-        mensajeReserva.setValue("Procesando reserva...");
-
-        // Obtenemos la fecha actual con el formato que espera Flask
         String fechaHoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
         ReservaRequest request = new ReservaRequest(idSesion, cantidadEntradas, fechaHoy);
 
         apiService.crearReserva(token, request).enqueue(new Callback<ReservaResponse>() {
             @Override
             public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    mensajeReserva.setValue(response.body().getMensaje());
-                    reservaExitosa.setValue(true); // Avisamos a la UI que todo fue bien
+                    mensajeReserva.setValue(response.body().getMensaje()); // Esto ahora dirá "Entradas compradas exitosamente"
+                    reservaExitosa.setValue(true);
                 } else {
                     mensajeReserva.setValue("Error al reservar. Comprueba tu sesión.");
                 }

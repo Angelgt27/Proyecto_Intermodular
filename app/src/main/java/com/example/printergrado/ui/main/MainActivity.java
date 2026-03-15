@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
 
@@ -12,51 +13,44 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.printergrado.R;
 import com.example.printergrado.ui.auth.LoginActivity;
 import com.example.printergrado.viewmodel.MainViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     private View barraSuperior;
     private BottomNavigationView bottomNav;
-
-    private RecyclerView rvPeliculas;
-    private PeliculaAdapter adapter;
     private MainViewModel mainViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // --- AÑADIDO: SEGURIDAD Y TOKEN ---
+        // --- 1. SEGURIDAD ---
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("jwt_token", null);
 
-        if (token == null) {
-            // No hay token, mandamos al usuario al Login y cerramos el Main
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+        if (token == null || !isTokenValido(token)) {
+            prefs.edit().remove("jwt_token").apply();
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
-        // ----------------------------------
 
-        // 1. Pantalla completa (borde a borde)
+        // --- 2. VISTAS ---
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_main);
 
-        // 2. Enlazar vistas
         barraSuperior = findViewById(R.id.barraSuperiorMain);
         bottomNav = findViewById(R.id.bottomNavigation);
-        rvPeliculas = findViewById(R.id.rvPeliculas);
 
-        // 3. Gestionar Insets (Cámara y Gestos)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             barraSuperior.getLayoutParams().height = insets.top;
@@ -65,27 +59,56 @@ public class MainActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-        // 4. Configurar RecyclerView y Adaptador
-        rvPeliculas.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new PeliculaAdapter();
-        rvPeliculas.setAdapter(adapter);
-
-        // 5. Configurar ViewModel y observar los datos
+        // --- 3. VIEWMODEL COMPARTIDO (Solo para Toasts de error aquí) ---
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
-
-        mainViewModel.getPeliculas().observe(this, peliculas -> {
-            if (peliculas != null) {
-                adapter.setPeliculas(peliculas); // Mandamos las pelis a la lista
-            }
+        mainViewModel.getMensajes().observe(this, msj -> {
+            if (msj != null) Toast.makeText(this, msj, Toast.LENGTH_SHORT).show();
         });
 
-        mainViewModel.getError().observe(this, errorMsg -> {
-            if (errorMsg != null) {
-                Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-            }
-        });
-
-        // 6. Finalmente, pedimos a la API que descargue las películas
+        // Pedimos descargar las películas una sola vez al abrir la app
         mainViewModel.cargarPeliculas();
+
+        // --- 4. NAVEGACIÓN CON FRAGMENTS ---
+        bottomNav.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                selectedFragment = new HomeFragment();
+            } else if (itemId == R.id.nav_tickets) {
+                selectedFragment = new TicketsFragment();
+            }
+            // (Aquí añadiremos Perfil y Ajustes en el futuro)
+
+            if (selectedFragment != null) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, selectedFragment)
+                        .commit();
+                return true;
+            }
+            return false;
+        });
+
+        // Seleccionar Home por defecto si es la primera vez que arranca
+        if (savedInstanceState == null) {
+            bottomNav.setSelectedItemId(R.id.nav_home);
+        }
+    }
+
+    private boolean isTokenValido(String token) {
+        try {
+            String[] split = token.split("\\.");
+            if (split.length < 2) return false;
+            String payload = new String(Base64.decode(split[1], Base64.URL_SAFE));
+            JSONObject jsonObject = new JSONObject(payload);
+            if (jsonObject.has("exp")) {
+                long exp = jsonObject.getLong("exp");
+                return (System.currentTimeMillis() / 1000) < exp;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

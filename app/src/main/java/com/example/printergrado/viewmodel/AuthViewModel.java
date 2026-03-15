@@ -19,18 +19,18 @@ public class AuthViewModel extends ViewModel {
     // Variables reactivas
     private final MutableLiveData<String> mensajeToast = new MutableLiveData<>();
     private final MutableLiveData<String> loginToken = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> authSuccess = new MutableLiveData<>(); // Restaurado para RegisterActivity
+    private final MutableLiveData<Boolean> authSuccess = new MutableLiveData<>();
+
+    // Instancia única del ApiService
+    private final ApiService apiService = ApiClient.getClient().create(ApiService.class);
 
     // Getters
     public LiveData<String> getMensajeToast() { return mensajeToast; }
     public LiveData<String> getLoginToken() { return loginToken; }
     public LiveData<Boolean> getAuthSuccess() { return authSuccess; }
-    private final ApiService apiService = ApiClient.getClient().create(ApiService.class);
 
-    // --- LÓGICA DE LOGIN (Con el nuevo campo 'recordar') ---
+    // --- LÓGICA DE LOGIN ---
     public void login(String email, String password, boolean recordar) {
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
         LoginRequest request = new LoginRequest(email, password, recordar);
 
         apiService.loginUsuario(request).enqueue(new Callback<AuthResponse>() {
@@ -53,7 +53,7 @@ public class AuthViewModel extends ViewModel {
 
     // --- LÓGICA DE REGISTRO ---
     public void register(String nombre, String email, String password, String confirmPassword) {
-        // Validaciones silenciosas
+        // Validaciones previas
         if (nombre.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             return;
         }
@@ -72,16 +72,14 @@ public class AuthViewModel extends ViewModel {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Mantenemos SOLO el mensaje de éxito del servidor
                     mensajeToast.setValue(response.body().getMensaje());
                     authSuccess.setValue(true); // Avisamos para volver al Login
                 }
-                // Si el correo ya existe (400), falla en silencio
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                // Si no hay internet, falla en silencio
+                // Falla en silencio si no hay internet
             }
         });
     }

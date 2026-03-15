@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:background="@color/blanco"
+    android:elevation="2dp"
+    android:padding="12dp">
+
+    <ImageView
+        android:id="@+id/ivTicketWIP"
+        android:layout_width="80dp"
+        android:layout_height="100dp"
+        android:background="@color/gris_claro_borde"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_image_wip"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvTituloTicket"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Título"
+        android:textColor="@color/negro"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivTicketWIP"
+        app:layout_constraintTop_toTopOf="@id/ivTicketWIP" />
+
+    <TextView
+        android:id="@+id/tvDescripcionTicket"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Descripción"
+        android:textColor="@color/gris_oscuro"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tvTituloTicket"
+        app:layout_constraintTop_toBottomOf="@id/tvTituloTicket" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@id/tvTituloTicket"
+        app:layout_constraintTop_toBottomOf="@id/tvDescripcionTicket"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerTicket"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Ver"
+            android:textColor="@color/negro"
+            app:strokeColor="@color/gris_claro_borde"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEliminarTicket"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Eliminar"
+            android:textColor="@color/negro"
+            app:strokeColor="@color/gris_claro_borde" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
