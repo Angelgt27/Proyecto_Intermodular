@@ -16,41 +16,37 @@ import retrofit2.Response;
 
 public class AuthViewModel extends ViewModel {
 
-    // LiveData para comunicarnos con la interfaz (Activity)
+    // Variables reactivas
     private final MutableLiveData<String> mensajeToast = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> authSuccess = new MutableLiveData<>();
     private final MutableLiveData<String> loginToken = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> authSuccess = new MutableLiveData<>(); // Restaurado para RegisterActivity
 
-    // Instanciamos nuestro servicio API de Retrofit
+    // Getters
+    public LiveData<String> getMensajeToast() { return mensajeToast; }
+    public LiveData<String> getLoginToken() { return loginToken; }
+    public LiveData<Boolean> getAuthSuccess() { return authSuccess; }
     private final ApiService apiService = ApiClient.getClient().create(ApiService.class);
 
-    // Getters para que la Activity pueda observar
-    public LiveData<String> getMensajeToast() { return mensajeToast; }
-    public LiveData<Boolean> getAuthSuccess() { return authSuccess; }
-    public LiveData<String> getLoginToken() { return loginToken; }
+    // --- LÓGICA DE LOGIN (Con el nuevo campo 'recordar') ---
+    public void login(String email, String password, boolean recordar) {
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
 
-    // --- LÓGICA DE LOGIN ---
-    public void login(String email, String password) {
-        // Validaciones silenciosas: si falta algo, simplemente no hace nada
-        if (email.isEmpty() || password.isEmpty()) {
-            return;
-        }
-
-        LoginRequest request = new LoginRequest(email, password);
+        LoginRequest request = new LoginRequest(email, password, recordar);
 
         apiService.loginUsuario(request).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // ¡Login exitoso! Guardamos el token en el LiveData
+                    // Si va bien, enviamos el token a la vista
                     loginToken.setValue(response.body().getAccessToken());
+                } else {
+                    mensajeToast.setValue("Error de credenciales");
                 }
-                // Si hay error 401 (mala contraseña), ahora falla en silencio
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                // Si no hay internet, falla en silencio
+                mensajeToast.setValue("Error de conexión");
             }
         });
     }

@@ -1,5 +1,8 @@
 package com.example.printergrado.ui.main;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -14,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.printergrado.R;
+import com.example.printergrado.ui.auth.LoginActivity;
 import com.example.printergrado.viewmodel.MainViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -29,6 +33,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // --- AÑADIDO: SEGURIDAD Y TOKEN ---
+        SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
+        String token = prefs.getString("jwt_token", null);
+
+        if (token == null) {
+            // No hay token, mandamos al usuario al Login y cerramos el Main
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        // ----------------------------------
 
         // 1. Pantalla completa (borde a borde)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
