@@ -1,9 +1,14 @@
 package com.example.printergrado.ui.main;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,7 +19,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.printergrado.R;
+import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.viewmodel.MainViewModel;
+import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
@@ -22,49 +34,95 @@ public class HomeFragment extends Fragment {
     private PeliculaAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
 
+    // Lista original para poder filtrar sin perder los datos
+    private List<Pelicula> todasLasPeliculas = new ArrayList<>();
+
+    // Vistas de los filtros
+    private TextInputEditText etFiltroNombre;
+    private TextInputEditText etFiltroFecha;
+    private AutoCompleteTextView spinnerFiltroCine;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // Enlazar Vistas
         RecyclerView rv = view.findViewById(R.id.rvPeliculas);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshHome);
+        etFiltroNombre = view.findViewById(R.id.etFiltroNombre);
+        etFiltroFecha = view.findViewById(R.id.etFiltroFecha);
+        spinnerFiltroCine = view.findViewById(R.id.spinnerFiltroCine);
 
-        // Color de la rueda de carga
         swipeRefreshLayout.setColorSchemeResources(R.color.rojo_cine);
 
+        // Configurar Lista
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new PeliculaAdapter();
         rv.setAdapter(adapter);
 
+        // --- CONFIGURAR FILTROS (Cine y Fecha) ---
+        String[] cines = new String[]{"Cine Yelmo Ideal", "Cinesa Las Rozas", "Kinepolis Ciudad de la Imagen", "Todos"};
+        ArrayAdapter<String> adapterCines = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, cines);
+        spinnerFiltroCine.setAdapter(adapterCines);
+
+        etFiltroFecha.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            new DatePickerDialog(requireContext(), (vista, year, month, dayOfMonth) -> {
+                String fecha = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
+                etFiltroFecha.setText(fecha);
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        // --- BÚSQUEDA EN TIEMPO REAL (Filtro por Nombre) ---
+        etFiltroNombre.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filtrarPeliculas(); // Llama al filtro cada vez que el usuario teclea una letra
+            }
+        });
+
+        // Configurar ViewModel
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        // Evento al deslizar el dedo hacia abajo
         swipeRefreshLayout.setOnRefreshListener(() -> {
             mainViewModel.cargarPeliculas();
         });
 
-        // --- SOLUCIÓN AL PARPADEO ---
-        // Solo mostramos la rueda automáticamente si NO tenemos películas guardadas en memoria
         if (mainViewModel.getPeliculas().getValue() == null) {
             swipeRefreshLayout.setRefreshing(true);
         }
 
-        // Observador de películas
         mainViewModel.getPeliculas().observe(getViewLifecycleOwner(), peliculas -> {
-            swipeRefreshLayout.setRefreshing(false); // Ocultamos la rueda
+            swipeRefreshLayout.setRefreshing(false);
             if (peliculas != null) {
-                adapter.setPeliculas(peliculas);
+                todasLasPeliculas = peliculas;
+                filtrarPeliculas(); // Aplicamos los filtros al cargar
             }
         });
 
-        // Observador de errores
         mainViewModel.getMensajes().observe(getViewLifecycleOwner(), msj -> {
-            if (msj != null) {
-                swipeRefreshLayout.setRefreshing(false); // Ocultamos la rueda si hay error
-            }
+            if (msj != null) swipeRefreshLayout.setRefreshing(false);
         });
 
         return view;
+    }
+
+    private void filtrarPeliculas() {
+        String textoBuscado = etFiltroNombre.getText().toString().toLowerCase().trim();
+        List<Pelicula> listaFiltrada = new ArrayList<>();
+
+        for (Pelicula pelicula : todasLasPeliculas) {
+            // Comprobamos si el título contiene lo que el usuario ha escrito
+            if (pelicula.getTitulo().toLowerCase().contains(textoBuscado)) {
+                listaFiltrada.add(pelicula);
+            }
+        }
+
+        // Enviamos la lista filtrada al adaptador
+        adapter.setPeliculas(listaFiltrada);
     }
 }

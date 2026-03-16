@@ -9,10 +9,6 @@ import com.example.printergrado.data.api.ApiService;
 import com.example.printergrado.data.model.ReservaRequest;
 import com.example.printergrado.data.model.ReservaResponse;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -26,18 +22,19 @@ public class ReservaViewModel extends ViewModel {
     public LiveData<String> getMensajeReserva() { return mensajeReserva; }
     public LiveData<Boolean> getReservaExitosa() { return reservaExitosa; }
 
-    public void hacerReserva(String token, int idSesion, int cantidadEntradas) {
-        String fechaHoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        ReservaRequest request = new ReservaRequest(idSesion, cantidadEntradas, fechaHoy);
+    // --- AÑADIDO: Ahora recibe 'fechaSeleccionada' como parámetro ---
+    public void hacerReserva(String token, int idSesion, int cantidadEntradas, String fechaSeleccionada) {
+
+        ReservaRequest request = new ReservaRequest(idSesion, cantidadEntradas, fechaSeleccionada);
 
         apiService.crearReserva(token, request).enqueue(new Callback<ReservaResponse>() {
             @Override
             public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    mensajeReserva.setValue(response.body().getMensaje()); // Esto ahora dirá "Entradas compradas exitosamente"
+                    mensajeReserva.setValue(response.body().getMensaje());
                     reservaExitosa.setValue(true);
                 } else {
-                    mensajeReserva.setValue("Error al reservar. Comprueba tu sesión.");
+                    mensajeReserva.setValue("Error al reservar. Comprueba tu sesión o los datos.");
                 }
             }
 
