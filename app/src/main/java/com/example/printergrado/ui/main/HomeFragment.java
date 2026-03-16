@@ -34,10 +34,8 @@ public class HomeFragment extends Fragment {
     private PeliculaAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    // Lista original para poder filtrar sin perder los datos
     private List<Pelicula> todasLasPeliculas = new ArrayList<>();
 
-    // Vistas de los filtros
     private TextInputEditText etFiltroNombre;
     private TextInputEditText etFiltroFecha;
     private AutoCompleteTextView spinnerFiltroCine;
@@ -47,7 +45,6 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Enlazar Vistas
         RecyclerView rv = view.findViewById(R.id.rvPeliculas);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshHome);
         etFiltroNombre = view.findViewById(R.id.etFiltroNombre);
@@ -56,15 +53,17 @@ public class HomeFragment extends Fragment {
 
         swipeRefreshLayout.setColorSchemeResources(R.color.rojo_cine);
 
-        // Configurar Lista
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new PeliculaAdapter();
         rv.setAdapter(adapter);
 
-        // --- CONFIGURAR FILTROS (Cine y Fecha) ---
+        // --- CONFIGURAR FILTROS ---
         String[] cines = new String[]{"Cine Yelmo Ideal", "Cinesa Las Rozas", "Kinepolis Ciudad de la Imagen", "Todos"};
         ArrayAdapter<String> adapterCines = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, cines);
         spinnerFiltroCine.setAdapter(adapterCines);
+
+        // AÑADIDO: Seleccionar "Todos" por defecto sin desplegar el menú
+        spinnerFiltroCine.setText("Todos", false);
 
         etFiltroFecha.setOnClickListener(v -> {
             Calendar cal = Calendar.getInstance();
@@ -74,18 +73,16 @@ public class HomeFragment extends Fragment {
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
         });
 
-        // --- BÚSQUEDA EN TIEMPO REAL (Filtro por Nombre) ---
         etFiltroNombre.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
-                filtrarPeliculas(); // Llama al filtro cada vez que el usuario teclea una letra
+                filtrarPeliculas();
             }
         });
 
-        // Configurar ViewModel
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -100,7 +97,7 @@ public class HomeFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
             if (peliculas != null) {
                 todasLasPeliculas = peliculas;
-                filtrarPeliculas(); // Aplicamos los filtros al cargar
+                filtrarPeliculas();
             }
         });
 
@@ -116,13 +113,10 @@ public class HomeFragment extends Fragment {
         List<Pelicula> listaFiltrada = new ArrayList<>();
 
         for (Pelicula pelicula : todasLasPeliculas) {
-            // Comprobamos si el título contiene lo que el usuario ha escrito
             if (pelicula.getTitulo().toLowerCase().contains(textoBuscado)) {
                 listaFiltrada.add(pelicula);
             }
         }
-
-        // Enviamos la lista filtrada al adaptador
         adapter.setPeliculas(listaFiltrada);
     }
 }

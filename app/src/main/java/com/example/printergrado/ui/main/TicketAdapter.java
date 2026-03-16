@@ -45,21 +45,18 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     public void onBindViewHolder(@NonNull TicketViewHolder holder, int position) {
         Ticket ticket = listaTickets.get(position);
 
-        // --- TEXTO FORMAL PROFESIONAL ---
-        // Ejemplo: "Star Wars: Episodio IV (2)"
         holder.tvTitulo.setText(ticket.getTitulo() + " (" + ticket.getCantidadTickets() + ")");
-
-        // Ejemplo: "Fecha: 2026-03-20 • Hora: 16:00"
         String info = "Fecha: " + ticket.getFecha() + " • Hora: " + ticket.getHora();
         holder.tvDescripcion.setText(info);
-        // --------------------------------
 
         holder.btnVer.setOnClickListener(v -> {
             android.content.Intent intent = new android.content.Intent(v.getContext(), TicketDetailActivity.class);
             intent.putExtra("TITULO", ticket.getTitulo());
             intent.putExtra("FECHA", ticket.getFecha());
             intent.putExtra("HORA", ticket.getHora());
-            intent.putExtra("CANTIDAD", ticket.getCantidadTickets());
+            // --- AÑADIDO: Enviamos el Cine y la Lista de Butacas ---
+            intent.putExtra("CINE", ticket.getCine());
+            intent.putStringArrayListExtra("BUTACAS", new ArrayList<>(ticket.getButacas()));
             v.getContext().startActivity(intent);
         });
 

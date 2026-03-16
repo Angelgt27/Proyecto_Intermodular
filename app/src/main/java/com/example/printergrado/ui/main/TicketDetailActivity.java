@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.printergrado.R;
 
+import java.util.ArrayList;
+
 public class TicketDetailActivity extends AppCompatActivity {
 
     @Override
@@ -21,7 +23,6 @@ public class TicketDetailActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_ticket_detail);
 
-        // Ajustamos la barra roja para que no se pise con la cámara/batería
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             findViewById(R.id.barraSuperiorDetalle).setPadding(0, insets.top, 0, 0);
@@ -29,22 +30,23 @@ public class TicketDetailActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-        // Botón Volver
         TextView btnVolver = findViewById(R.id.btnVolverDetalle);
         btnVolver.setOnClickListener(v -> finish());
 
-        // Configuramos la lista
         RecyclerView rv = findViewById(R.id.rvQRTickets);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        // Recibimos los datos y creamos el adaptador
         if (getIntent() != null) {
             String titulo = getIntent().getStringExtra("TITULO");
             String fecha = getIntent().getStringExtra("FECHA");
             String hora = getIntent().getStringExtra("HORA");
-            int cantidad = getIntent().getIntExtra("CANTIDAD", 1);
+            // --- AÑADIDO: Recibimos los nuevos datos ---
+            String cine = getIntent().getStringExtra("CINE");
+            ArrayList<String> butacas = getIntent().getStringArrayListExtra("BUTACAS");
 
-            QRTicketAdapter adapter = new QRTicketAdapter(titulo, fecha, hora, cantidad);
+            if (butacas == null) butacas = new ArrayList<>();
+
+            QRTicketAdapter adapter = new QRTicketAdapter(titulo, fecha, hora, cine, butacas);
             rv.setAdapter(adapter);
         }
     }
