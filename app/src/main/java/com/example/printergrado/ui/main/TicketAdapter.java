@@ -44,8 +44,11 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     @Override
     public void onBindViewHolder(@NonNull TicketViewHolder holder, int position) {
         Ticket ticket = listaTickets.get(position);
-
-        holder.tvTitulo.setText(ticket.getTitulo() + " (" + ticket.getCantidadTickets() + ")");
+        String tituloFinal = ticket.getTitulo();
+        if (ticket.getCantidadTickets() > 1) {
+            tituloFinal += " (" + ticket.getCantidadTickets() + ")";
+        }
+        holder.tvTitulo.setText(tituloFinal);
         String info = "Fecha: " + ticket.getFecha() + " • Hora: " + ticket.getHora();
         holder.tvDescripcion.setText(info);
 

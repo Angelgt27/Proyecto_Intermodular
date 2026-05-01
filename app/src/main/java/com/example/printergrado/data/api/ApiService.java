@@ -7,20 +7,21 @@ import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.data.model.ReservaRequest;
 import com.example.printergrado.data.model.ReservaResponse;
 import com.example.printergrado.data.model.Ticket;
+import com.example.printergrado.data.model.Butaca;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ApiService {
-
 
     @POST("api/register")
     Call<AuthResponse> registrarUsuario(@Body RegistroRequest request);
@@ -31,11 +32,13 @@ public interface ApiService {
     @GET("api/peliculas")
     Call<List<Pelicula>> getPeliculas();
 
+    // Antiguo método de reserva
     @POST("api/reservas")
-    Call<ReservaResponse> crearReserva(
-            @Header("Authorization") String token,
-            @Body ReservaRequest request
-    );
+    Call<ReservaResponse> crearReserva(@Header("Authorization") String token, @Body ReservaRequest request);
+
+    // NUEVO MÉTODO DE RESERVA (Acepta la lista de IDs de butacas)
+    @POST("api/reservas")
+    Call<ReservaResponse> crearReservaConButacas(@Header("Authorization") String token, @Body Map<String, Object> request);
 
     @GET("api/reservas")
     Call<List<Ticket>> getMisTickets(@Header("Authorization") String token);
@@ -45,4 +48,23 @@ public interface ApiService {
 
     @POST("api/escanear/{qr_code}")
     Call<ReservaResponse> escanearTicket(@Header("Authorization") String token, @Path("qr_code") String qrCode);
+
+    @GET("api/usuario/perfil")
+    Call<com.example.printergrado.data.model.Usuario> obtenerPerfil(@Header("Authorization") String token);
+
+    @PUT("api/usuario/nombre")
+    Call<com.example.printergrado.data.model.ReservaResponse> cambiarNombre(@Header("Authorization") String token, @Body java.util.Map<String, String> body);
+
+    @DELETE("api/usuario")
+    Call<com.example.printergrado.data.model.ReservaResponse> eliminarCuenta(@Header("Authorization") String token);
+
+    @GET("api/usuario/historial")
+    Call<List<com.example.printergrado.data.model.Ticket>> obtenerHistorial(@Header("Authorization") String token);
+
+    @GET("api/peliculas/{id}/sesiones")
+    Call<java.util.List<com.example.printergrado.data.model.Sesion>> getSesionesPelicula(@Path("id") int idPelicula);
+
+    // NUEVO: Obtener mapa de butacas
+    @GET("api/sesiones/{id_sesion}/butacas")
+    Call<List<Butaca>> getMapaButacas(@Header("Authorization") String token, @Path("id_sesion") int idSesion);
 }

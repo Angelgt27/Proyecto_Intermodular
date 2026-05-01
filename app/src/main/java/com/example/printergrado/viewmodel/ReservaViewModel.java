@@ -6,8 +6,11 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.printergrado.data.api.ApiClient;
 import com.example.printergrado.data.api.ApiService;
-import com.example.printergrado.data.model.ReservaRequest;
 import com.example.printergrado.data.model.ReservaResponse;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,19 +25,22 @@ public class ReservaViewModel extends ViewModel {
     public LiveData<String> getMensajeReserva() { return mensajeReserva; }
     public LiveData<Boolean> getReservaExitosa() { return reservaExitosa; }
 
-    // --- AÑADIDO: Ahora recibe 'fechaSeleccionada' como parámetro ---
-    public void hacerReserva(String token, int idSesion, int cantidadEntradas, String fechaSeleccionada) {
+    // --- NUEVO MÉTODO CON BUTACAS ---
+    public void hacerReservaConButacas(String token, int idSesion, List<Integer> idsButacas) {
 
-        ReservaRequest request = new ReservaRequest(idSesion, cantidadEntradas, fechaSeleccionada);
+        // Empaquetamos los datos como Flask los espera
+        Map<String, Object> request = new HashMap<>();
+        request.put("id_sesion", idSesion);
+        request.put("ids_butacas", idsButacas);
 
-        apiService.crearReserva(token, request).enqueue(new Callback<ReservaResponse>() {
+        apiService.crearReservaConButacas(token, request).enqueue(new Callback<ReservaResponse>() {
             @Override
             public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     mensajeReserva.setValue(response.body().getMensaje());
                     reservaExitosa.setValue(true);
                 } else {
-                    mensajeReserva.setValue("Error al reservar. Comprueba tu sesión o los datos.");
+                    mensajeReserva.setValue("Error al reservar. Puede que alguien haya comprado la butaca.");
                 }
             }
 
