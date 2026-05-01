@@ -6,21 +6,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.printergrado.R;
 import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.ui.reserva.ReservaActivity;
 import com.google.android.material.button.MaterialButton;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.PeliculaViewHolder> {
 
     private List<Pelicula> listaPeliculas = new ArrayList<>();
+    private String userRole = "Usuario";
+
+    public void setRole(String role) {
+        this.userRole = role;
+        notifyDataSetChanged();
+    }
 
     public void setPeliculas(List<Pelicula> peliculas) {
         this.listaPeliculas = peliculas;
@@ -37,25 +40,25 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
     @Override
     public void onBindViewHolder(@NonNull PeliculaViewHolder holder, int position) {
         Pelicula pelicula = listaPeliculas.get(position);
-
         holder.tvTitulo.setText(pelicula.getTitulo());
-
         String info = pelicula.getGenero() + " • " + pelicula.getDuracion() + " min\n" + pelicula.getSinopsis();
         holder.tvDescripcion.setText(info);
 
-        holder.btnReservar.setOnClickListener(v -> {
-            Context context = v.getContext();
-            Intent intent = new Intent(context, ReservaActivity.class);
-
-            // --- AÑADIDO: Enviamos el ID real de la película ---
-            intent.putExtra("ID_PELICULA", pelicula.getIdPelicula());
-            intent.putExtra("TITULO", pelicula.getTitulo());
-            intent.putExtra("GENERO", pelicula.getGenero());
-            intent.putExtra("DURACION", pelicula.getDuracion());
-            intent.putExtra("SINOPSIS", pelicula.getSinopsis());
-
-            context.startActivity(intent);
-        });
+        if ("Admin".equals(userRole)) {
+            holder.btnReservar.setVisibility(View.GONE);
+        } else {
+            holder.btnReservar.setVisibility(View.VISIBLE);
+            holder.btnReservar.setOnClickListener(v -> {
+                Context context = v.getContext();
+                Intent intent = new Intent(context, ReservaActivity.class);
+                intent.putExtra("ID_PELICULA", pelicula.getIdPelicula());
+                intent.putExtra("TITULO", pelicula.getTitulo());
+                intent.putExtra("GENERO", pelicula.getGenero());
+                intent.putExtra("DURACION", pelicula.getDuracion());
+                intent.putExtra("SINOPSIS", pelicula.getSinopsis());
+                context.startActivity(intent);
+            });
+        }
     }
 
     @Override

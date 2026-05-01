@@ -26,15 +26,15 @@ public class ProfileFragment extends Fragment {
         LinearLayout btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
 
         btnCerrarSesion.setOnClickListener(v -> {
-            // 1. Borramos el token de SharedPreferences
             SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
-            prefs.edit().remove("jwt_token").apply();
+            SharedPreferences.Editor editor = prefs.edit();
 
-            // 2. Redirigimos al Login
+            editor.remove("jwt_token");
+            editor.remove("rol");
+            editor.apply();
+
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
             startActivity(intent);
-
-            // 3. Destruimos el MainActivity para que no pueda volver atrás
             requireActivity().finish();
         });
 

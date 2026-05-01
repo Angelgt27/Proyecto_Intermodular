@@ -5,4 +5,6 @@
     <color name="rojo_cine">#F44336</color>
     <color name="gris_oscuro">#333333</color>
     <color name="gris_claro_borde">#CCCCCC</color>
+    <color name="zxing_viewfinder_laser">@color/rojo_cine</color>
+    <color name="zxing_viewfinder_mask">#80000000</color>
 </resources>

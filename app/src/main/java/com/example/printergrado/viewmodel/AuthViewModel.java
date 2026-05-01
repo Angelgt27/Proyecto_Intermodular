@@ -21,6 +21,7 @@ public class AuthViewModel extends ViewModel {
     private final MutableLiveData<Boolean> authSuccess = new MutableLiveData<>();
     private final ApiService apiService = ApiClient.getClient().create(ApiService.class);
     private final MutableLiveData<String> loginRole = new MutableLiveData<>();
+
     public LiveData<String> getMensajeToast() { return mensajeToast; }
     public LiveData<String> getLoginToken() { return loginToken; }
     public LiveData<Boolean> getAuthSuccess() { return authSuccess; }
@@ -28,38 +29,50 @@ public class AuthViewModel extends ViewModel {
 
     // --- LÓGICA DE LOGIN ---
     public void login(String email, String password, boolean recordar) {
+
+        // Si los campos están vacíos, avisamos al usuario
+        if (email.isEmpty() || password.isEmpty()) {
+            mensajeToast.setValue("Por favor, introduce tu correo y contraseña");
+            return;
+        }
+
         LoginRequest request = new LoginRequest(email, password, recordar);
 
         apiService.loginUsuario(request).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    loginToken.setValue(response.body().getAccessToken());
+                    // ARREGLADO: Primero guardamos el rol, y DESPUÉS el token.
+                    // (Porque el token desencadena el cambio de pantalla)
                     loginRole.setValue(response.body().getRol());
+                    loginToken.setValue(response.body().getAccessToken());
                 } else {
-                    mensajeToast.setValue("Error de credenciales");
+                    mensajeToast.setValue("Error de credenciales. Revisa tu email o contraseña.");
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                mensajeToast.setValue("Error de conexión");
+                mensajeToast.setValue("Error de conexión al servidor");
             }
         });
     }
 
     // --- LÓGICA DE REGISTRO ---
     public void register(String nombre, String email, String password, String confirmPassword) {
-        // Validaciones previas
+        // ARREGLADO: Si algo falla, ahora avisa por pantalla en lugar de fallar en silencio
         if (nombre.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            mensajeToast.setValue("Por favor, rellena todos los campos");
             return;
         }
 
         if (!password.equals(confirmPassword)) {
+            mensajeToast.setValue("Las contraseñas no coinciden");
             return;
         }
 
         if (password.length() < 6) {
+            mensajeToast.setValue("La contraseña debe tener al menos 6 caracteres");
             return;
         }
 
@@ -71,12 +84,14 @@ public class AuthViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     mensajeToast.setValue(response.body().getMensaje());
                     authSuccess.setValue(true); // Avisamos para volver al Login
+                } else {
+                    mensajeToast.setValue("Error al registrar: Puede que el correo ya exista.");
                 }
             }
 
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                // Falla en silencio si no hay internet
+                mensajeToast.setValue("Error de conexión al registrarse");
             }
         });
     }

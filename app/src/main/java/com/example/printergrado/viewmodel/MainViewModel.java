@@ -81,4 +81,21 @@ public class MainViewModel extends ViewModel {
             }
         });
     }
+
+    public void escanearTicket(String token, String qrCode) {
+        apiService.escanearTicket(token, qrCode).enqueue(new Callback<ReservaResponse>() {
+            @Override
+            public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    mensajeLiveData.setValue(response.body().getMensaje());
+                } else {
+                    mensajeLiveData.setValue("Error: Entrada rechazada o ya usada");
+                }
+            }
+            @Override
+            public void onFailure(Call<ReservaResponse> call, Throwable t) {
+                mensajeLiveData.setValue("Error de conexión con el escáner");
+            }
+        });
+    }
 }

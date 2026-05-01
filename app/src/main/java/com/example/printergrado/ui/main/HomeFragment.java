@@ -1,6 +1,8 @@
 package com.example.printergrado.ui.main;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -51,10 +53,18 @@ public class HomeFragment extends Fragment {
         etFiltroFecha = view.findViewById(R.id.etFiltroFecha);
         spinnerFiltroCine = view.findViewById(R.id.spinnerFiltroCine);
 
+        // Leemos el rol
+        SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
+        String rol = prefs.getString("rol", "Usuario");
+
         swipeRefreshLayout.setColorSchemeResources(R.color.rojo_cine);
 
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new PeliculaAdapter();
+
+        // --- ARREGLADO: Le pasamos el rol al adaptador para que oculte el botón de reservar ---
+        adapter.setRole(rol);
+
         rv.setAdapter(adapter);
 
         // --- CONFIGURAR FILTROS ---
@@ -62,7 +72,7 @@ public class HomeFragment extends Fragment {
         ArrayAdapter<String> adapterCines = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, cines);
         spinnerFiltroCine.setAdapter(adapterCines);
 
-        // AÑADIDO: Seleccionar "Todos" por defecto sin desplegar el menú
+        // Seleccionar "Todos" por defecto sin desplegar el menú
         spinnerFiltroCine.setText("Todos", false);
 
         etFiltroFecha.setOnClickListener(v -> {
@@ -88,6 +98,14 @@ public class HomeFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             mainViewModel.cargarPeliculas();
         });
+
+        // --- ARREGLADO: Escudo anti-crasheo por si tilFiltroCine no existe en el XML ---
+        if ("Admin".equals(rol)) {
+            View tilCine = view.findViewById(R.id.tilFiltroCine);
+            if (tilCine != null) {
+                tilCine.setVisibility(View.GONE);
+            }
+        }
 
         if (mainViewModel.getPeliculas().getValue() == null) {
             swipeRefreshLayout.setRefreshing(true);

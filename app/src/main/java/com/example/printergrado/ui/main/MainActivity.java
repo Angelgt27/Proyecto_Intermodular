@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         // --- 1. SEGURIDAD ---
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("jwt_token", null);
+        String rol = prefs.getString("rol", "Usuario");
 
         if (token == null || !isTokenValido(token)) {
             prefs.edit().remove("jwt_token").apply();
@@ -68,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
         // Pedimos descargar las películas una sola vez al abrir la app
         mainViewModel.cargarPeliculas();
 
+        // Si es admin, cambiamos el texto del botón inferior
+        if ("Admin".equals(rol)) {
+            bottomNav.getMenu().findItem(R.id.nav_tickets).setTitle("Escáner");
+        }
+
         // --- 4. NAVEGACIÓN CON FRAGMENTS ---
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
@@ -76,16 +82,17 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_tickets) {
-                selectedFragment = new TicketsFragment();
+                if ("Admin".equals(rol)) {
+                    selectedFragment = new ScannerFragment();
+                } else {
+                    selectedFragment = new TicketsFragment();
+                }
             } else if (itemId == R.id.nav_profile) {
-                selectedFragment = new ProfileFragment(); // Pestaña de Perfil integrada
+                selectedFragment = new ProfileFragment();
             }
 
             if (selectedFragment != null) {
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, selectedFragment)
-                        .commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
                 return true;
             }
             return false;
