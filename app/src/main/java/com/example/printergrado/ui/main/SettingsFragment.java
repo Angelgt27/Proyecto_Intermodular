@@ -1,0 +1,91 @@
+package com.example.printergrado.ui.main;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.example.printergrado.R;
+import com.example.printergrado.data.api.ApiClient;
+import com.example.printergrado.data.api.ApiService;
+import com.example.printergrado.data.model.ReservaResponse;
+import com.example.printergrado.ui.auth.LoginActivity;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class SettingsFragment extends Fragment {
+
+    private ApiService apiService;
+    private String token;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        LinearLayout btnLicencia = view.findViewById(R.id.btnLicencia);
+        LinearLayout btnEliminar = view.findViewById(R.id.btnEliminarCuentaSettings);
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("jwt_token", "");
+        apiService = ApiClient.getClient().create(ApiService.class);
+
+        // 1. CLICK LICENCIA
+        btnLicencia.setOnClickListener(v -> mostrarDialogoLicencia());
+
+        // 2. CLICK ELIMINAR CUENTA
+        btnEliminar.setOnClickListener(v -> mostrarDialogoEliminarCuenta());
+
+        return view;
+    }
+
+    private void mostrarDialogoLicencia() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Licencia de Uso")
+                .setMessage("Este proyecto se distribuye bajo la licencia Atribución-No Comercial (CC BY-NC).\n\n" +
+                        "Esta licencia permite que cualquier persona pueda utilizar, modificar y distribuir el código de la aplicación " +
+                        "siempre que sea con fines no comerciales, y siempre y cuando respeten la autoría original.")
+                .setPositiveButton("Entendido", null)
+                .show();
+    }
+
+    private void mostrarDialogoEliminarCuenta() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("¿Eliminar cuenta?")
+                .setMessage("¿Estás completamente seguro? Esta acción borrará todas tus reservas y no se puede deshacer.")
+                .setPositiveButton("Eliminar para siempre", (dialog, which) -> {
+                    apiService.eliminarCuenta(token).enqueue(new Callback<ReservaResponse>() {
+                        @Override
+                        public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(getContext(), "Cuenta eliminada", Toast.LENGTH_SHORT).show();
+                                cerrarSesion();
+                            }
+                        }
+                        @Override public void onFailure(Call<ReservaResponse> call, Throwable t) {}
+                    });
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void cerrarSesion() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+        Intent intent = new Intent(requireActivity(), LoginActivity.class);
+        startActivity(intent);
+        requireActivity().finish();
+    }
+}

@@ -90,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
             }
+            else if (itemId == R.id.nav_settings) {
+                selectedFragment = new SettingsFragment();
+            }
 
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();

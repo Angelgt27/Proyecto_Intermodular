@@ -49,7 +49,6 @@ public class ProfileFragment extends Fragment {
         LinearLayout btnCambiarNombre = view.findViewById(R.id.btnCambiarNombre);
         LinearLayout btnHistorialReservas = view.findViewById(R.id.btnHistorialReservas);
         LinearLayout btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
-        LinearLayout btnEliminarCuenta = view.findViewById(R.id.btnEliminarCuenta);
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
@@ -69,9 +68,6 @@ public class ProfileFragment extends Fragment {
 
         // 4. CERRAR SESIÓN
         btnCerrarSesion.setOnClickListener(v -> cerrarSesion());
-
-        // 5. ELIMINAR CUENTA (Advertencia)
-        btnEliminarCuenta.setOnClickListener(v -> mostrarDialogoEliminarCuenta());
 
         return view;
     }
@@ -129,27 +125,6 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onFailure(Call<ReservaResponse> call, Throwable t) {}
         });
-    }
-
-    private void mostrarDialogoEliminarCuenta() {
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("⚠Eliminar Cuenta")
-                .setMessage("¿Estás completamente seguro? Esta acción borrará todas tus reservas y no se puede deshacer.")
-                .setPositiveButton("Sí, eliminar", (dialog, which) -> {
-                    apiService.eliminarCuenta(token).enqueue(new Callback<ReservaResponse>() {
-                        @Override
-                        public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(getContext(), "Cuenta eliminada", Toast.LENGTH_LONG).show();
-                                cerrarSesion(); // Borra datos locales y expulsa
-                            }
-                        }
-                        @Override
-                        public void onFailure(Call<ReservaResponse> call, Throwable t) {}
-                    });
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
     }
 
     private void cerrarSesion() {
