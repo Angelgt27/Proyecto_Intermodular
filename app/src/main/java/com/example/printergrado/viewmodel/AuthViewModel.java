@@ -16,18 +16,15 @@ import retrofit2.Response;
 
 public class AuthViewModel extends ViewModel {
 
-    // Variables reactivas
     private final MutableLiveData<String> mensajeToast = new MutableLiveData<>();
     private final MutableLiveData<String> loginToken = new MutableLiveData<>();
     private final MutableLiveData<Boolean> authSuccess = new MutableLiveData<>();
-
-    // Instancia única del ApiService
     private final ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-    // Getters
+    private final MutableLiveData<String> loginRole = new MutableLiveData<>();
     public LiveData<String> getMensajeToast() { return mensajeToast; }
     public LiveData<String> getLoginToken() { return loginToken; }
     public LiveData<Boolean> getAuthSuccess() { return authSuccess; }
+    public LiveData<String> getLoginRole() { return loginRole; }
 
     // --- LÓGICA DE LOGIN ---
     public void login(String email, String password, boolean recordar) {
@@ -37,8 +34,8 @@ public class AuthViewModel extends ViewModel {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Si va bien, enviamos el token a la vista
                     loginToken.setValue(response.body().getAccessToken());
+                    loginRole.setValue(response.body().getRol());
                 } else {
                     mensajeToast.setValue("Error de credenciales");
                 }

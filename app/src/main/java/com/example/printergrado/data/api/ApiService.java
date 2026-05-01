@@ -42,4 +42,7 @@ public interface ApiService {
 
     @DELETE("api/reservas/{id_sesion}")
     Call<ReservaResponse> cancelarTicket(@Header("Authorization") String token, @Path("id_sesion") int idSesion);
+
+    @POST("api/escanear/{qr_code}")
+    Call<ReservaResponse> escanearTicket(@Header("Authorization") String token, @Path("qr_code") String qrCode);
 }

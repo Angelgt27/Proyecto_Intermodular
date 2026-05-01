@@ -9,6 +9,7 @@ public class Ticket {
     private String hora;
     private String cine;
     private List<String> butacas;
+    private List<String> qr_codes;
     private int cantidad_tickets;
 
     public int getIdSesion() { return id_sesion; }
@@ -17,5 +18,6 @@ public class Ticket {
     public String getHora() { return hora; }
     public String getCine() { return cine; }
     public List<String> getButacas() { return butacas; }
+    public List<String> getQrCodes() { return qr_codes; }
     public int getCantidadTickets() { return cantidad_tickets; }
 }

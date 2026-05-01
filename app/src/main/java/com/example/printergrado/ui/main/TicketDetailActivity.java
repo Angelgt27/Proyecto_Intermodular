@@ -40,13 +40,13 @@ public class TicketDetailActivity extends AppCompatActivity {
             String titulo = getIntent().getStringExtra("TITULO");
             String fecha = getIntent().getStringExtra("FECHA");
             String hora = getIntent().getStringExtra("HORA");
-            // --- AÑADIDO: Recibimos los nuevos datos ---
             String cine = getIntent().getStringExtra("CINE");
             ArrayList<String> butacas = getIntent().getStringArrayListExtra("BUTACAS");
+            ArrayList<String> qrs = getIntent().getStringArrayListExtra("QRS");
 
             if (butacas == null) butacas = new ArrayList<>();
 
-            QRTicketAdapter adapter = new QRTicketAdapter(titulo, fecha, hora, cine, butacas);
+            QRTicketAdapter adapter = new QRTicketAdapter(titulo, fecha, hora, cine, butacas, qrs);
             rv.setAdapter(adapter);
         }
     }

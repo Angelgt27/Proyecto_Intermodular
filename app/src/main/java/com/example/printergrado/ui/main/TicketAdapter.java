@@ -54,9 +54,9 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
             intent.putExtra("TITULO", ticket.getTitulo());
             intent.putExtra("FECHA", ticket.getFecha());
             intent.putExtra("HORA", ticket.getHora());
-            // --- AÑADIDO: Enviamos el Cine y la Lista de Butacas ---
             intent.putExtra("CINE", ticket.getCine());
             intent.putStringArrayListExtra("BUTACAS", new ArrayList<>(ticket.getButacas()));
+            intent.putStringArrayListExtra("QRS", new ArrayList<>(ticket.getQrCodes()));
             v.getContext().startActivity(intent);
         });
 
