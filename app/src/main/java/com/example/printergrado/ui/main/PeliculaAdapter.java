@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.printergrado.R;
@@ -62,6 +64,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
         if ("Admin".equals(userRole)) {
             holder.btnReservar.setVisibility(View.GONE);
             holder.btnEditar.setVisibility(View.VISIBLE);
+            holder.btnSesiones.setVisibility(View.VISIBLE); // Mostrar botón Sesiones
 
             holder.btnEditar.setOnClickListener(v -> {
                 Context context = v.getContext();
@@ -74,8 +77,20 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
                 intent.putExtra("IMAGEN", pelicula.getImagen());
                 context.startActivity(intent);
             });
+
+            // --- NUEVO: Clic en el botón Sesiones ---
+            holder.btnSesiones.setOnClickListener(v -> {
+                Context context = v.getContext();
+                // Prepararemos esta Activity a continuación
+                Intent intent = new Intent(context, AdminSesionesActivity.class);
+                intent.putExtra("ID_PELICULA", pelicula.getIdPelicula());
+                intent.putExtra("TITULO_PELICULA", pelicula.getTitulo());
+                context.startActivity(intent);
+            });
+
         } else {
             holder.btnEditar.setVisibility(View.GONE);
+            holder.btnSesiones.setVisibility(View.GONE); // Ocultar a usuarios normales
             holder.btnReservar.setVisibility(View.VISIBLE);
 
             holder.btnReservar.setOnClickListener(v -> {
@@ -99,7 +114,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
 
     static class PeliculaViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitulo, tvDescripcion;
-        MaterialButton btnReservar, btnEditar;
+        MaterialButton btnReservar, btnEditar, btnSesiones; // AÑADIDO btnSesiones
         ImageView ivPelicula;
 
         public PeliculaViewHolder(@NonNull View itemView) {
@@ -108,6 +123,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionPelicula);
             btnReservar = itemView.findViewById(R.id.btnReservarItem);
             btnEditar = itemView.findViewById(R.id.btnEditarItem);
+            btnSesiones = itemView.findViewById(R.id.btnSesionesItem);
             ivPelicula = itemView.findViewById(R.id.ivPeliculaWIP);
         }
     }

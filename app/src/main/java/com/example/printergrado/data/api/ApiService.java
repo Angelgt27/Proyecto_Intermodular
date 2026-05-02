@@ -73,4 +73,16 @@ public interface ApiService {
 
     @DELETE("api/peliculas/{id}")
     Call<ReservaResponse> eliminarPelicula(@Header("Authorization") String token, @Path("id") int idPelicula);
+
+    @GET("api/peliculas/{id}/sesiones")
+    Call<java.util.List<com.example.printergrado.data.model.Sesion>> getSesionesPelicula(@Path("id") int idPelicula, @retrofit2.http.Query("admin") boolean isAdmin);
+
+    @POST("api/peliculas/{id}/sesiones")
+    Call<ReservaResponse> crearSesion(@Header("Authorization") String token, @Path("id") int idPelicula, @Body java.util.Map<String, Object> body);
+
+    @PUT("api/sesiones/{id}")
+    Call<ReservaResponse> actualizarSesion(@Header("Authorization") String token, @Path("id") int idSesion, @Body java.util.Map<String, Object> body);
+
+    @DELETE("api/sesiones/{id}")
+    Call<ReservaResponse> eliminarSesion(@Header("Authorization") String token, @Path("id") int idSesion);
 }
