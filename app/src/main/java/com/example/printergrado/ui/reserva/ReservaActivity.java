@@ -39,7 +39,8 @@ public class ReservaActivity extends AppCompatActivity {
 
     private TextView tvTitulo, tvGenero, tvDuracion, tvSinopsis, btnVolver;
     private AutoCompleteTextView spinnerCine, spinnerFecha, spinnerHora;
-    private View layoutFecha, layoutHora, tvInstruccionButacas;
+    // AÑADIDA viewPantalla aquí
+    private View layoutFecha, layoutHora, tvInstruccionButacas, viewPantalla;
     private RecyclerView rvButacas;
     private MaterialButton btnComprar;
 
@@ -67,6 +68,7 @@ public class ReservaActivity extends AppCompatActivity {
         layoutFecha = findViewById(R.id.layoutFecha);
         layoutHora = findViewById(R.id.layoutHora);
         tvInstruccionButacas = findViewById(R.id.tvInstruccionButacas);
+        viewPantalla = findViewById(R.id.viewPantalla); // AÑADIDO el enlace aquí
         rvButacas = findViewById(R.id.rvButacas);
         btnComprar = findViewById(R.id.btnComprar);
 
@@ -188,6 +190,7 @@ public class ReservaActivity extends AppCompatActivity {
 
     private void ocultarMapa() {
         tvInstruccionButacas.setVisibility(View.GONE);
+        viewPantalla.setVisibility(View.GONE);
         rvButacas.setVisibility(View.GONE);
         btnComprar.setEnabled(false);
         btnComprar.setText("Selecciona al menos una butaca");
@@ -205,9 +208,10 @@ public class ReservaActivity extends AppCompatActivity {
                     List<Butaca> listaButacas = response.body();
 
                     tvInstruccionButacas.setVisibility(View.VISIBLE);
+                    viewPantalla.setVisibility(View.VISIBLE);
                     rvButacas.setVisibility(View.VISIBLE);
 
-                    // --- MAGIA: Calcular columnas dinámicamente ---
+                    // Calcular columnas dinámicamente
                     int numColumnas = 0;
                     if (!listaButacas.isEmpty()) {
                         String primeraFila = listaButacas.get(0).getFila();
@@ -217,7 +221,7 @@ public class ReservaActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    if (numColumnas == 0) numColumnas = 10; // Valor de seguridad
+                    if (numColumnas == 0) numColumnas = 10;
 
                     // Aplicamos el spanCount dinámico
                     rvButacas.setLayoutManager(new GridLayoutManager(ReservaActivity.this, numColumnas));
@@ -253,7 +257,6 @@ public class ReservaActivity extends AppCompatActivity {
         if (token != null) {
             btnComprar.setEnabled(false);
             btnComprar.setText("Procesando...");
-            // Llamamos al ViewModel (Ahora enviando la lista de IDs)
             reservaViewModel.hacerReservaConButacas("Bearer " + token, idSesionFinal, butacasElegidas);
         }
     }

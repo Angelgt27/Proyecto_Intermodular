@@ -68,7 +68,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:text="Eliminar"
+            android:text="Devolver"
             android:textColor="@color/negro"
             app:strokeColor="@color/gris_claro_borde" />
 

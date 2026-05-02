@@ -163,11 +163,24 @@
                 android:id="@+id/tvInstruccionButacas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="4. Selecciona tus asientos (La pantalla es la parte superior):"
+                android:layout_marginTop="8dp"
+                android:text="4. Selecciona tus asientos:"
                 android:textStyle="bold"
                 android:textColor="@color/negro"
                 android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/viewPantalla"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginTop="24dp"
+                android:background="#D3D3D3"
+                android:text="PANTALLA"
+                android:textColor="@color/blanco"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvButacas"

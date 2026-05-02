@@ -1,5 +1,6 @@
 package com.example.printergrado.ui.main;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.printergrado.R;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -45,13 +47,20 @@ public class QRTicketAdapter extends RecyclerView.Adapter<QRTicketAdapter.QRView
         holder.tvTitulo.setText(titulo);
         String cineStr = (cine != null && !cine.isEmpty()) ? cine : "Cine no especificado";
         holder.tvInfo.setText(cineStr + "\n" + fecha + " • " + hora);
-        holder.tvNumero.setText("Butaca Asignada: " + butacas.get(position));
+
+        String asiento = butacas.get(position);
+        holder.tvNumero.setText("Butaca Asignada: " + asiento);
 
         String contenidoQR = qrs.get(position);
-        Bitmap qrBitmap = generarQR(contenidoQR);
+
+        Bitmap qrBitmap = generarQR(contenidoQR, 512);
         if (qrBitmap != null) {
             holder.ivQR.setImageBitmap(qrBitmap);
         }
+
+        holder.ivQR.setOnClickListener(v -> {
+            mostrarQRAmpliado(v.getContext(), asiento, contenidoQR);
+        });
     }
 
     @Override
@@ -59,10 +68,10 @@ public class QRTicketAdapter extends RecyclerView.Adapter<QRTicketAdapter.QRView
         return butacas.size();
     }
 
-    private Bitmap generarQR(String content) {
+    private Bitmap generarQR(String content, int size) {
         QRCodeWriter writer = new QRCodeWriter();
         try {
-            BitMatrix bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, 512, 512);
+            BitMatrix bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, size, size);
             int width = bitMatrix.getWidth();
             int height = bitMatrix.getHeight();
             Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
@@ -75,6 +84,23 @@ public class QRTicketAdapter extends RecyclerView.Adapter<QRTicketAdapter.QRView
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private void mostrarQRAmpliado(Context context, String asiento, String contenidoQR) {
+        ImageView imageView = new ImageView(context);
+        imageView.setPadding(64, 64, 64, 64); // Margen para que respire
+
+        // Generamos el QR a alta resolución (800x800)
+        Bitmap bitmap = generarQR(contenidoQR, 800);
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+        }
+
+        new MaterialAlertDialogBuilder(context)
+                .setTitle("Asiento: " + asiento)
+                .setView(imageView)
+                .setPositiveButton("Cerrar", null)
+                .show();
     }
 
     static class QRViewHolder extends RecyclerView.ViewHolder {
