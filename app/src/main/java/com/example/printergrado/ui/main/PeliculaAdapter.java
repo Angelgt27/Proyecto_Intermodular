@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,6 +45,19 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
         String info = pelicula.getGenero() + " • " + pelicula.getDuracion() + " min\n" + pelicula.getSinopsis();
         holder.tvDescripcion.setText(info);
 
+        // --- Cargar imagen desde Base64 ---
+        if (pelicula.getImagen() != null && !pelicula.getImagen().isEmpty()) {
+            try {
+                byte[] decodedString = android.util.Base64.decode(pelicula.getImagen(), android.util.Base64.DEFAULT);
+                android.graphics.Bitmap decodedByte = android.graphics.BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                holder.ivPelicula.setImageBitmap(decodedByte);
+            } catch (Exception e) {
+                holder.ivPelicula.setImageResource(R.drawable.ic_imagen);
+            }
+        } else {
+            holder.ivPelicula.setImageResource(R.drawable.ic_imagen);
+        }
+
         // Lógica de roles
         if ("Admin".equals(userRole)) {
             holder.btnReservar.setVisibility(View.GONE);
@@ -57,7 +71,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
                 intent.putExtra("GENERO", pelicula.getGenero());
                 intent.putExtra("DURACION", pelicula.getDuracion());
                 intent.putExtra("SINOPSIS", pelicula.getSinopsis());
-                intent.putExtra("FK_CINE", pelicula.getFkCine());
+                intent.putExtra("IMAGEN", pelicula.getImagen());
                 context.startActivity(intent);
             });
         } else {
@@ -72,6 +86,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
                 intent.putExtra("GENERO", pelicula.getGenero());
                 intent.putExtra("DURACION", pelicula.getDuracion());
                 intent.putExtra("SINOPSIS", pelicula.getSinopsis());
+                intent.putExtra("IMAGEN", pelicula.getImagen());
                 context.startActivity(intent);
             });
         }
@@ -85,6 +100,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
     static class PeliculaViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitulo, tvDescripcion;
         MaterialButton btnReservar, btnEditar;
+        ImageView ivPelicula;
 
         public PeliculaViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -92,6 +108,7 @@ public class PeliculaAdapter extends RecyclerView.Adapter<PeliculaAdapter.Pelicu
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionPelicula);
             btnReservar = itemView.findViewById(R.id.btnReservarItem);
             btnEditar = itemView.findViewById(R.id.btnEditarItem);
+            ivPelicula = itemView.findViewById(R.id.ivPeliculaWIP);
         }
     }
 }

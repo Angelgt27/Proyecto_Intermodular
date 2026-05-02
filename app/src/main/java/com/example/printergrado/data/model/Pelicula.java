@@ -10,6 +10,7 @@ public class Pelicula {
     private int duracion;
     private String genero;
     private String sinopsis;
+    private String imagen;
 
     @SerializedName("fk_cine")
     private int fkCine;
@@ -21,4 +22,5 @@ public class Pelicula {
     public String getGenero() { return genero; }
     public String getSinopsis() { return sinopsis; }
     public int getFkCine() { return fkCine; }
+    public String getImagen() { return imagen; }
 }

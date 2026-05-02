@@ -2,11 +2,18 @@ package com.example.printergrado.ui.main;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -20,6 +27,8 @@ import com.example.printergrado.data.model.ReservaResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,12 +38,23 @@ import retrofit2.Response;
 
 public class AdminFormularioActivity extends AppCompatActivity {
 
-    private TextInputEditText etTitulo, etGenero, etDuracion, etSinopsis, etCine;
+    private TextInputEditText etTitulo, etGenero, etDuracion, etSinopsis;
     private MaterialButton btnGuardar, btnEliminar;
     private TextView tvTituloToolbar;
+    private ImageView ivPreview;
+
     private int peliculaId = -1; // -1 significa crear nueva
+    private String imagenBase64 = null; // Guardará la foto convertida
     private ApiService apiService;
     private String token;
+
+    // Lanzador para abrir la galería de fotos
+    private final ActivityResultLauncher<String> selectorImagen = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) processImage(uri);
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +76,13 @@ public class AdminFormularioActivity extends AppCompatActivity {
         etGenero = findViewById(R.id.etGeneroPelicula);
         etDuracion = findViewById(R.id.etDuracionPelicula);
         etSinopsis = findViewById(R.id.etSinopsisPelicula);
-        etCine = findViewById(R.id.etCinePelicula);
         btnGuardar = findViewById(R.id.btnGuardarPelicula);
         btnEliminar = findViewById(R.id.btnEliminarPelicula);
         tvTituloToolbar = findViewById(R.id.tvTituloToolbar);
+        ivPreview = findViewById(R.id.ivPreviewPelicula);
 
         findViewById(R.id.btnVolverForm).setOnClickListener(v -> finish());
+        findViewById(R.id.btnSeleccionarImagen).setOnClickListener(v -> selectorImagen.launch("image/*"));
 
         apiService = ApiClient.getClient().create(ApiService.class);
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
@@ -75,7 +96,18 @@ public class AdminFormularioActivity extends AppCompatActivity {
             etGenero.setText(getIntent().getStringExtra("GENERO"));
             etDuracion.setText(String.valueOf(getIntent().getIntExtra("DURACION", 0)));
             etSinopsis.setText(getIntent().getStringExtra("SINOPSIS"));
-            etCine.setText(String.valueOf(getIntent().getIntExtra("FK_CINE", 1)));
+
+            // Si la peli ya tenía imagen, la decodificamos
+            String imgActual = getIntent().getStringExtra("IMAGEN");
+            if (imgActual != null && !imgActual.isEmpty()) {
+                try {
+                    byte[] decoded = Base64.decode(imgActual, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                    ivPreview.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
             btnEliminar.setVisibility(View.VISIBLE); // Mostrar botón eliminar
         }
@@ -84,17 +116,40 @@ public class AdminFormularioActivity extends AppCompatActivity {
         btnEliminar.setOnClickListener(v -> eliminarPelicula());
     }
 
+    private void processImage(Uri uri) {
+        try {
+            InputStream is = getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+            // Redimensionamos la imagen a tamaño "cartel" para no colapsar la BD
+            Bitmap resized = Bitmap.createScaledBitmap(bitmap, 300, 450, true);
+            ivPreview.setImageBitmap(resized);
+
+            // Convertimos a Base64
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            resized.compress(Bitmap.CompressFormat.JPEG, 70, baos); // Calidad 70%
+            byte[] imageBytes = baos.toByteArray();
+            imagenBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void guardarPelicula() {
         Map<String, Object> datos = new HashMap<>();
         datos.put("titulo", etTitulo.getText().toString());
         datos.put("genero", etGenero.getText().toString());
         datos.put("sinopsis", etSinopsis.getText().toString());
 
+        if (imagenBase64 != null) {
+            datos.put("imagen", imagenBase64); // Se envía solo si ha cambiado
+        }
+
         try {
             datos.put("duracion", Integer.parseInt(etDuracion.getText().toString()));
-            datos.put("fk_cine", Integer.parseInt(etCine.getText().toString()));
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Duración y Cine deben ser números", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "La duración debe ser un número", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -136,7 +191,7 @@ public class AdminFormularioActivity extends AppCompatActivity {
             Toast.makeText(this, response.body().getMensaje(), Toast.LENGTH_SHORT).show();
             finish();
         } else {
-            Toast.makeText(this, "Error en la operación. Revisa las dependencias de datos.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error en la operación. Revisa los datos.", Toast.LENGTH_LONG).show();
             btnGuardar.setEnabled(true);
             btnEliminar.setEnabled(true);
         }

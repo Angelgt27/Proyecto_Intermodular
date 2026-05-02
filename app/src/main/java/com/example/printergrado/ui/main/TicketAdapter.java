@@ -1,10 +1,13 @@
 package com.example.printergrado.ui.main;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,13 +47,28 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     @Override
     public void onBindViewHolder(@NonNull TicketViewHolder holder, int position) {
         Ticket ticket = listaTickets.get(position);
+
         String tituloFinal = ticket.getTitulo();
         if (ticket.getCantidadTickets() > 1) {
             tituloFinal += " (" + ticket.getCantidadTickets() + ")";
         }
         holder.tvTitulo.setText(tituloFinal);
+
         String info = "Fecha: " + ticket.getFecha() + " • Hora: " + ticket.getHora();
         holder.tvDescripcion.setText(info);
+
+        // --- NUEVO: Decodificar y mostrar el póster ---
+        if (ticket.getImagen() != null && !ticket.getImagen().isEmpty()) {
+            try {
+                byte[] decoded = Base64.decode(ticket.getImagen(), Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                holder.ivCartel.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                holder.ivCartel.setImageResource(R.drawable.ic_imagen);
+            }
+        } else {
+            holder.ivCartel.setImageResource(R.drawable.ic_imagen);
+        }
 
         holder.btnVer.setOnClickListener(v -> {
             android.content.Intent intent = new android.content.Intent(v.getContext(), TicketDetailActivity.class);
@@ -76,6 +94,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     static class TicketViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitulo, tvDescripcion;
         MaterialButton btnVer, btnEliminar;
+        ImageView ivCartel;
 
         public TicketViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -83,6 +102,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
             tvDescripcion = itemView.findViewById(R.id.tvDescripcionTicket);
             btnVer = itemView.findViewById(R.id.btnVerTicket);
             btnEliminar = itemView.findViewById(R.id.btnEliminarTicket);
+            ivCartel = itemView.findViewById(R.id.ivTicketWIP);
         }
     }
 }

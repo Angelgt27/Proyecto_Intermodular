@@ -2,10 +2,14 @@ package com.example.printergrado.ui.reserva;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,8 +42,8 @@ import retrofit2.Response;
 public class ReservaActivity extends AppCompatActivity {
 
     private TextView tvTitulo, tvGenero, tvDuracion, tvSinopsis, btnVolver;
+    private ImageView ivCartel; // AÑADIDO
     private AutoCompleteTextView spinnerCine, spinnerFecha, spinnerHora;
-    // AÑADIDA viewPantalla aquí
     private View layoutFecha, layoutHora, tvInstruccionButacas, viewPantalla;
     private RecyclerView rvButacas;
     private MaterialButton btnComprar;
@@ -62,17 +66,17 @@ public class ReservaActivity extends AppCompatActivity {
         tvGenero = findViewById(R.id.tvGeneroReserva);
         tvDuracion = findViewById(R.id.tvDuracionReserva);
         tvSinopsis = findViewById(R.id.tvSinopsisReserva);
+        ivCartel = findViewById(R.id.ivCartelReserva); // AÑADIDO
         spinnerCine = findViewById(R.id.spinnerCine);
         spinnerFecha = findViewById(R.id.spinnerFecha);
         spinnerHora = findViewById(R.id.spinnerHora);
         layoutFecha = findViewById(R.id.layoutFecha);
         layoutHora = findViewById(R.id.layoutHora);
         tvInstruccionButacas = findViewById(R.id.tvInstruccionButacas);
-        viewPantalla = findViewById(R.id.viewPantalla); // AÑADIDO el enlace aquí
+        viewPantalla = findViewById(R.id.viewPantalla);
         rvButacas = findViewById(R.id.rvButacas);
         btnComprar = findViewById(R.id.btnComprar);
 
-        // Ajuste para la barra superior
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             View barraSuperior = findViewById(R.id.barraSuperiorReserva);
@@ -94,11 +98,22 @@ public class ReservaActivity extends AppCompatActivity {
             if (duracion > 0) tvDuracion.setText(duracion + " min");
             String sinopsis = getIntent().getStringExtra("SINOPSIS");
             if (sinopsis != null) tvSinopsis.setText(sinopsis);
+
+            // --- NUEVO: Cargar la imagen ---
+            String imagenBase64 = getIntent().getStringExtra("IMAGEN");
+            if (imagenBase64 != null && !imagenBase64.isEmpty()) {
+                try {
+                    byte[] decoded = Base64.decode(imagenBase64, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                    ivCartel.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    ivCartel.setImageResource(R.drawable.ic_imagen);
+                }
+            }
         }
 
         reservaViewModel = new ViewModelProvider(this).get(ReservaViewModel.class);
 
-        // Observadores de ViewModel
         reservaViewModel.getMensajeReserva().observe(this, mensaje -> {
             if (mensaje != null) {
                 Toast.makeText(ReservaActivity.this, mensaje, Toast.LENGTH_LONG).show();
@@ -110,14 +125,11 @@ public class ReservaActivity extends AppCompatActivity {
             if (exitosa != null && exitosa) finish();
         });
 
-        // 1. Cargamos las sesiones
         cargarSesiones();
-
-        // 2. Evento del botón comprar
         btnComprar.setOnClickListener(v -> realizarCompra());
     }
 
-    private void cargarSesiones() {
+    private void cargarSesiones() { /* ... igual que antes ... */
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         apiService.getSesionesPelicula(idPelicula).enqueue(new Callback<List<Sesion>>() {
             @Override
@@ -136,7 +148,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void configurarSelectorCine() {
+    private void configurarSelectorCine() { /* ... igual que antes ... */
         Set<String> cines = new HashSet<>();
         for (Sesion s : todasLasSesiones) cines.add(s.getCine());
 
@@ -155,7 +167,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void filtrarFechas(String cine) {
+    private void filtrarFechas(String cine) { /* ... igual que antes ... */
         Set<String> fechas = new HashSet<>();
         for (Sesion s : todasLasSesiones) {
             if (s.getCine().equals(cine)) fechas.add(s.getFecha());
@@ -171,7 +183,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void filtrarHoras(String cine, String fecha) {
+    private void filtrarHoras(String cine, String fecha) { /* ... igual que antes ... */
         List<Sesion> sesionesFinales = new ArrayList<>();
         List<String> horas = new ArrayList<>();
         for (Sesion s : todasLasSesiones) {
@@ -188,7 +200,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void ocultarMapa() {
+    private void ocultarMapa() { /* ... igual que antes ... */
         tvInstruccionButacas.setVisibility(View.GONE);
         viewPantalla.setVisibility(View.GONE);
         rvButacas.setVisibility(View.GONE);
@@ -196,7 +208,7 @@ public class ReservaActivity extends AppCompatActivity {
         btnComprar.setText("Selecciona al menos una butaca");
     }
 
-    private void cargarMapaButacas(int idSesion) {
+    private void cargarMapaButacas(int idSesion) { /* ... igual que antes ... */
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("jwt_token", "");
 
@@ -211,7 +223,6 @@ public class ReservaActivity extends AppCompatActivity {
                     viewPantalla.setVisibility(View.VISIBLE);
                     rvButacas.setVisibility(View.VISIBLE);
 
-                    // Calcular columnas dinámicamente
                     int numColumnas = 0;
                     if (!listaButacas.isEmpty()) {
                         String primeraFila = listaButacas.get(0).getFila();
@@ -223,7 +234,6 @@ public class ReservaActivity extends AppCompatActivity {
                     }
                     if (numColumnas == 0) numColumnas = 10;
 
-                    // Aplicamos el spanCount dinámico
                     rvButacas.setLayoutManager(new GridLayoutManager(ReservaActivity.this, numColumnas));
 
                     butacaAdapter = new ButacaAdapter(listaButacas, cantidad -> {
@@ -245,7 +255,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void realizarCompra() {
+    private void realizarCompra() { /* ... igual que antes ... */
         if (idSesionFinal == -1 || butacaAdapter == null) return;
 
         List<Integer> butacasElegidas = butacaAdapter.getButacasSeleccionadas();
