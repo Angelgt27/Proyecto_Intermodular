@@ -45,6 +45,7 @@ public class ScannerFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scanner, container, false);
 
         barcodeScannerView = view.findViewById(R.id.barcode_scanner);
+        barcodeScannerView.setStatusText("Escanea el QR de un ticket para validarlo");
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);

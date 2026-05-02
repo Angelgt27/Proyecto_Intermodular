@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("jwt_token", null);
         String rol = prefs.getString("rol", "Usuario");
+        boolean isAdmin = "Admin".equals(rol); // AÑADIDO: Guardamos el booleano
 
         if (token == null || !isTokenValido(token)) {
             prefs.edit().remove("jwt_token").apply();
@@ -66,11 +67,8 @@ public class MainActivity extends AppCompatActivity {
             if (msj != null) Toast.makeText(this, msj, Toast.LENGTH_SHORT).show();
         });
 
-        // Pedimos descargar las películas una sola vez al abrir la app
-        mainViewModel.cargarPeliculas();
-
         // Si es admin, cambiamos el texto del botón inferior
-        if ("Admin".equals(rol)) {
+        if (isAdmin) {
             bottomNav.getMenu().findItem(R.id.nav_tickets).setTitle("Escáner");
         }
 
@@ -82,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_tickets) {
-                if ("Admin".equals(rol)) {
+                if (isAdmin) {
                     selectedFragment = new ScannerFragment();
                 } else {
                     selectedFragment = new TicketsFragment();

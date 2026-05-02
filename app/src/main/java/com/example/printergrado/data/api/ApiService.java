@@ -30,7 +30,7 @@ public interface ApiService {
     Call<AuthResponse> loginUsuario(@Body LoginRequest request);
 
     @GET("api/peliculas")
-    Call<List<Pelicula>> getPeliculas();
+    Call<List<Pelicula>> getPeliculas(@retrofit2.http.Query("admin") boolean isAdmin);
 
     // Antiguo método de reserva
     @POST("api/reservas")
@@ -63,8 +63,14 @@ public interface ApiService {
 
     @GET("api/peliculas/{id}/sesiones")
     Call<java.util.List<com.example.printergrado.data.model.Sesion>> getSesionesPelicula(@Path("id") int idPelicula);
-
-    // NUEVO: Obtener mapa de butacas
     @GET("api/sesiones/{id_sesion}/butacas")
     Call<List<Butaca>> getMapaButacas(@Header("Authorization") String token, @Path("id_sesion") int idSesion);
+    @POST("api/peliculas")
+    Call<ReservaResponse> crearPelicula(@Header("Authorization") String token, @Body java.util.Map<String, Object> body);
+
+    @PUT("api/peliculas/{id}")
+    Call<ReservaResponse> actualizarPelicula(@Header("Authorization") String token, @Path("id") int idPelicula, @Body java.util.Map<String, Object> body);
+
+    @DELETE("api/peliculas/{id}")
+    Call<ReservaResponse> eliminarPelicula(@Header("Authorization") String token, @Path("id") int idPelicula);
 }

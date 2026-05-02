@@ -20,6 +20,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:src="@drawable/ic_imagen"/>
+
     <TextView
         android:id="@+id/tvTituloPelicula"
         android:layout_width="0dp"
@@ -47,18 +48,36 @@
         app:layout_constraintStart_toStartOf="@id/tvTituloPelicula"
         app:layout_constraintTop_toBottomOf="@id/tvTituloPelicula" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnReservarItem"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Reservar"
-        android:textAllCaps="false"
-        android:textColor="@color/blanco"
-        app:backgroundTint="@color/gris_oscuro"
-        app:cornerRadius="8dp"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="@id/tvTituloPelicula"
         app:layout_constraintTop_toBottomOf="@id/tvDescripcionPelicula"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReservarItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reservar"
+            android:textAllCaps="false"
+            android:textColor="@color/blanco"
+            app:backgroundTint="@color/gris_oscuro"
+            app:cornerRadius="8dp"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEditarItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Editar"
+            android:textAllCaps="false"
+            android:textColor="@color/blanco"
+            app:backgroundTint="@color/rojo_cine"
+            app:cornerRadius="8dp"
+            android:visibility="gone"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

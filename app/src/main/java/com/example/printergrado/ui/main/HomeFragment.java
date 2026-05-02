@@ -2,10 +2,12 @@ package com.example.printergrado.ui.main;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.printergrado.R;
 import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.viewmodel.MainViewModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -41,6 +44,10 @@ public class HomeFragment extends Fragment {
     private TextInputEditText etFiltroNombre;
     private TextInputEditText etFiltroFecha;
     private AutoCompleteTextView spinnerFiltroCine;
+    private FloatingActionButton fabAgregarPelicula;
+
+    // Lo hacemos variable de clase para usarlo en onResume
+    private boolean isAdmin = false;
 
     @Nullable
     @Override
@@ -52,27 +59,22 @@ public class HomeFragment extends Fragment {
         etFiltroNombre = view.findViewById(R.id.etFiltroNombre);
         etFiltroFecha = view.findViewById(R.id.etFiltroFecha);
         spinnerFiltroCine = view.findViewById(R.id.spinnerFiltroCine);
+        fabAgregarPelicula = view.findViewById(R.id.fabAgregarPelicula);
 
-        // Leemos el rol
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String rol = prefs.getString("rol", "Usuario");
+        isAdmin = "Admin".equals(rol);
 
         swipeRefreshLayout.setColorSchemeResources(R.color.rojo_cine);
 
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new PeliculaAdapter();
-
-        // --- ARREGLADO: Le pasamos el rol al adaptador para que oculte el botón de reservar ---
         adapter.setRole(rol);
-
         rv.setAdapter(adapter);
 
-        // --- CONFIGURAR FILTROS ---
         String[] cines = new String[]{"Cine Yelmo Ideal", "Cinesa Las Rozas", "Kinepolis Ciudad de la Imagen", "Todos"};
         ArrayAdapter<String> adapterCines = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, cines);
         spinnerFiltroCine.setAdapter(adapterCines);
-
-        // Seleccionar "Todos" por defecto sin desplegar el menú
         spinnerFiltroCine.setText("Todos", false);
 
         etFiltroFecha.setOnClickListener(v -> {
@@ -86,33 +88,29 @@ public class HomeFragment extends Fragment {
         etFiltroNombre.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                filtrarPeliculas();
-            }
+            @Override public void afterTextChanged(Editable s) { filtrarPeliculas(); }
         });
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            mainViewModel.cargarPeliculas();
-        });
-
-        // --- ARREGLADO: Escudo anti-crasheo por si tilFiltroCine no existe en el XML ---
-        if ("Admin".equals(rol)) {
+        if (isAdmin) {
             View tilCine = view.findViewById(R.id.tilFiltroCine);
             if (tilCine != null) {
                 tilCine.setVisibility(View.GONE);
             }
+            fabAgregarPelicula.setVisibility(View.VISIBLE);
+            fabAgregarPelicula.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), AdminFormularioActivity.class);
+                startActivity(intent);
+            });
         }
 
-        if (mainViewModel.getPeliculas().getValue() == null) {
-            swipeRefreshLayout.setRefreshing(true);
-        }
-
+        // Configurar Observadores
         mainViewModel.getPeliculas().observe(getViewLifecycleOwner(), peliculas -> {
-            swipeRefreshLayout.setRefreshing(false);
+            Log.d("DEPURACION", "4. Observer disparado en HomeFragment.");
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
             if (peliculas != null) {
                 todasLasPeliculas = peliculas;
                 filtrarPeliculas();
@@ -120,21 +118,43 @@ public class HomeFragment extends Fragment {
         });
 
         mainViewModel.getMensajes().observe(getViewLifecycleOwner(), msj -> {
-            if (msj != null) swipeRefreshLayout.setRefreshing(false);
+            if (msj != null && swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            mainViewModel.cargarPeliculas(isAdmin);
         });
 
         return view;
     }
 
+    // --- CLAVE: Cargamos datos cada vez que el fragmento vuelve a ser visible ---
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("DEPURACION", "HomeFragment onResume: Recargando peliculas...");
+
+        // Ponemos la animación de carga
+        swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
+
+        // Pedimos los datos (esto detectará cambios hechos en AdminFormularioActivity)
+        mainViewModel.cargarPeliculas(isAdmin);
+    }
+
     private void filtrarPeliculas() {
-        String textoBuscado = etFiltroNombre.getText().toString().toLowerCase().trim();
+        String textoBuscado = etFiltroNombre.getText() != null ? etFiltroNombre.getText().toString().toLowerCase().trim() : "";
         List<Pelicula> listaFiltrada = new ArrayList<>();
 
         for (Pelicula pelicula : todasLasPeliculas) {
-            if (pelicula.getTitulo().toLowerCase().contains(textoBuscado)) {
+            String titulo = pelicula.getTitulo();
+            if (titulo != null && titulo.toLowerCase().contains(textoBuscado)) {
                 listaFiltrada.add(pelicula);
             }
         }
+
+        Log.d("DEPURACION", "5. Dibujando " + listaFiltrada.size() + " peliculas en pantalla.");
         adapter.setPeliculas(listaFiltrada);
     }
 }

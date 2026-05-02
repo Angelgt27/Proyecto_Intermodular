@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/blanco">
+
+    <!-- Barra Superior -->
+    <LinearLayout
+        android:id="@+id/barraSuperiorForm"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/rojo_cine"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/btnVolverForm"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:text="← Volver"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"/>
+
+        <TextView
+            android:id="@+id/tvTituloToolbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nueva Película"
+            android:textColor="@color/blanco"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Título de la película"
+                app:boxStrokeColor="@color/rojo_cine">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTituloPelicula"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Género"
+                app:boxStrokeColor="@color/rojo_cine">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etGeneroPelicula"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Duración (en minutos)"
+                app:boxStrokeColor="@color/rojo_cine">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDuracionPelicula"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="ID del Cine (Ej: 1)"
+                app:boxStrokeColor="@color/rojo_cine">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCinePelicula"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Sinopsis"
+                app:boxStrokeColor="@color/rojo_cine">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSinopsisPelicula"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:lines="4"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarPelicula"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="24dp"
+                android:text="Guardar Película"
+                app:backgroundTint="@color/rojo_cine"
+                app:cornerRadius="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEliminarPelicula"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="8dp"
+                android:text="Eliminar Película"
+                android:textColor="@color/rojo_cine"
+                app:strokeColor="@color/rojo_cine"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

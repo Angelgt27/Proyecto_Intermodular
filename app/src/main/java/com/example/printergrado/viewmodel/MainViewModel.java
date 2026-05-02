@@ -1,5 +1,7 @@
 package com.example.printergrado.viewmodel;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -19,6 +21,7 @@ import retrofit2.Response;
 
 public class MainViewModel extends ViewModel {
 
+    // ÚNICAS VARIABLES NECESARIAS
     private final MutableLiveData<List<Pelicula>> peliculasLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<Ticket>> ticketsLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> mensajeLiveData = new MutableLiveData<>();
@@ -29,19 +32,28 @@ public class MainViewModel extends ViewModel {
     public LiveData<List<Ticket>> getTickets() { return ticketsLiveData; }
     public LiveData<String> getMensajes() { return mensajeLiveData; }
 
-    public void cargarPeliculas() {
-        apiService.getPeliculas().enqueue(new Callback<List<Pelicula>>() {
+    public void cargarPeliculas(boolean isAdmin) {
+        Log.d("DEPURACION", "1. Pidiendo películas al servidor. Modo Admin: " + isAdmin);
+
+        apiService.getPeliculas(isAdmin).enqueue(new Callback<List<Pelicula>>() {
             @Override
             public void onResponse(Call<List<Pelicula>> call, Response<List<Pelicula>> response) {
+                Log.d("DEPURACION", "2. Servidor respondió con código: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
-                    peliculasLiveData.setValue(response.body());
+                    Log.d("DEPURACION", "3. Éxito. Películas recibidas: " + response.body().size());
+                    // ARREGLADO: Ahora inyectamos los datos en la variable correcta
+                    peliculasLiveData.postValue(response.body());
                 } else {
-                    mensajeLiveData.setValue("Error al cargar la cartelera");
+                    Log.e("DEPURACION", "Error. El servidor devolvió algo raro o vacío.");
+                    mensajeLiveData.postValue("Error del servidor: Código " + response.code());
                 }
             }
+
             @Override
             public void onFailure(Call<List<Pelicula>> call, Throwable t) {
-                mensajeLiveData.setValue("Error de conexión");
+                Log.e("DEPURACION", "Fallo total de red: " + t.getMessage());
+                mensajeLiveData.postValue("Error de conexión crítico.");
             }
         });
     }
