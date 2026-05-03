@@ -56,10 +56,9 @@ public interface ApiService {
     @GET("api/usuario/historial")
     Call<List<com.example.printergrado.data.model.Ticket>> obtenerHistorial(@Header("Authorization") String token);
 
-    @GET("api/peliculas/{id}/sesiones")
-    Call<java.util.List<com.example.printergrado.data.model.Sesion>> getSesionesPelicula(@Path("id") int idPelicula);
     @GET("api/sesiones/{id_sesion}/butacas")
     Call<List<Butaca>> getMapaButacas(@Header("Authorization") String token, @Path("id_sesion") int idSesion);
+
     @POST("api/peliculas")
     Call<ReservaResponse> crearPelicula(@Header("Authorization") String token, @Body java.util.Map<String, Object> body);
 
@@ -83,4 +82,24 @@ public interface ApiService {
 
     @GET("api/salas")
     Call<List<com.example.printergrado.data.model.Sala>> getSalas(@Header("Authorization") String token);
+    @GET("api/admin/cine")
+    Call<Map<String, Object>> getDatosCine(@Header("Authorization") String token);
+
+    @PUT("api/admin/cine")
+    Call<ReservaResponse> updateDatosCine(@Header("Authorization") String token, @Body Map<String, String> body);
+
+    @GET("api/admin/reservas")
+    Call<List<Map<String, Object>>> getEstadisticasReservas(@Header("Authorization") String token);
+
+    @POST("api/admin/salas")
+    Call<ReservaResponse> crearSalaAdmin(@Header("Authorization") String token, @Body Map<String, Object> body);
+
+    @DELETE("api/admin/salas/{id_sala}")
+    Call<ReservaResponse> eliminarSalaAdmin(@Header("Authorization") String token, @Path("id_sala") int idSala);
+
+    @PUT("api/admin/salas/{id_sala}")
+    Call<ReservaResponse> editarSalaAdmin(@Header("Authorization") String token, @Path("id_sala") int idSala, @Body Map<String, Object> body);
+
+    @GET("api/admin/salas/{id_sala}/butacas")
+    Call<List<Butaca>> getButacasSalaAdmin(@Header("Authorization") String token, @Path("id_sala") int idSala);
 }

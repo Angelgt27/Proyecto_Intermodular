@@ -18,11 +18,12 @@ import java.util.List;
 
 public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaViewHolder> {
 
-    private final List<Butaca> listaButacas;
-    private final OnButacaSeleccionadaListener listener;
+    private List<Butaca> listaButacas;
+    private List<Integer> seleccionadas = new ArrayList<>();
+    private OnButacaSeleccionadaListener listener;
 
     public interface OnButacaSeleccionadaListener {
-        void onSeleccionCambiada(int cantidadSeleccionada);
+        void onSeleccionCambiada(int cantidad);
     }
 
     public ButacaAdapter(List<Butaca> listaButacas, OnButacaSeleccionadaListener listener) {
@@ -40,54 +41,63 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
     @Override
     public void onBindViewHolder(@NonNull ButacaViewHolder holder, int position) {
         Butaca butaca = listaButacas.get(position);
-        String textoAsiento = butaca.getFila() + "-" + butaca.getNumero();
-        holder.tvNumero.setText(textoAsiento);
 
-        // LÓGICA DE COLORES
-        if (butaca.isOcupada()) {
-            holder.card.setCardBackgroundColor(Color.parseColor("#E0E0E0")); // Gris (Ocupada)
-            holder.tvNumero.setTextColor(Color.parseColor("#9E9E9E"));
-            holder.itemView.setOnClickListener(null); // No se puede pulsar
-        } else if (butaca.isSeleccionada()) {
-            holder.card.setCardBackgroundColor(Color.parseColor("#D32F2F")); // Rojo (Tus asientos)
-            holder.tvNumero.setTextColor(Color.WHITE);
-            holder.itemView.setOnClickListener(v -> toggleSeleccion(position));
-        } else {
-            holder.card.setCardBackgroundColor(Color.parseColor("#388E3C")); // Verde (Libres)
-            holder.tvNumero.setTextColor(Color.WHITE);
-            holder.itemView.setOnClickListener(v -> toggleSeleccion(position));
-        }
-    }
-
-    private void toggleSeleccion(int position) {
-        Butaca butaca = listaButacas.get(position);
-        // Evitamos que compre más de 10 entradas de golpe (límite de la app)
-        if (!butaca.isSeleccionada() && getButacasSeleccionadas().size() >= 10) {
+        // Si es un pasillo/hueco (eliminado por el admin), ocultar
+        if (butaca == null) {
+            holder.itemView.setVisibility(View.INVISIBLE);
+            holder.itemView.setOnClickListener(null);
             return;
         }
-        butaca.setSeleccionada(!butaca.isSeleccionada());
-        notifyItemChanged(position); // Refresca el color
-        listener.onSeleccionCambiada(getButacasSeleccionadas().size()); // Avisa a ReservaActivity
-    }
 
-    public List<Integer> getButacasSeleccionadas() {
-        List<Integer> seleccionadas = new ArrayList<>();
-        for (Butaca b : listaButacas) {
-            if (b.isSeleccionada()) seleccionadas.add(b.getIdButaca());
+        holder.itemView.setVisibility(View.VISIBLE);
+
+        // TEXTO: Usamos el guion para separar, ej: "1-A"
+        holder.tvNumeroButaca.setText(butaca.getFila() + "-" + butaca.getColumna());
+
+        // --- LÓGICA DE COLORES CORREGIDA ---
+        if (butaca.isOcupada()) {
+            // Ya está vendida a alguien
+            holder.cardButaca.setCardBackgroundColor(Color.parseColor("#9E9E9E")); // GRIS (Ocupado)
+            holder.tvNumeroButaca.setTextColor(Color.WHITE);
+            holder.itemView.setOnClickListener(null);
+        } else if (seleccionadas.contains(butaca.getIdButaca())) {
+            // El usuario la ha tocado para comprarla
+            holder.cardButaca.setCardBackgroundColor(Color.parseColor("#E53935")); // ROJO (Seleccionada)
+            holder.tvNumeroButaca.setTextColor(Color.WHITE);
+            holder.itemView.setOnClickListener(v -> {
+                seleccionadas.remove(Integer.valueOf(butaca.getIdButaca()));
+                notifyItemChanged(position);
+                listener.onSeleccionCambiada(seleccionadas.size());
+            });
+        } else {
+            // Está libre para ser comprada (Estado por defecto)
+            holder.cardButaca.setCardBackgroundColor(Color.parseColor("#4CAF50")); // VERDE (Libre)
+            holder.tvNumeroButaca.setTextColor(Color.WHITE);
+            holder.itemView.setOnClickListener(v -> {
+                seleccionadas.add(butaca.getIdButaca());
+                notifyItemChanged(position);
+                listener.onSeleccionCambiada(seleccionadas.size());
+            });
         }
-        return seleccionadas;
     }
 
     @Override
-    public int getItemCount() { return listaButacas.size(); }
+    public int getItemCount() {
+        return listaButacas.size();
+    }
+
+    public List<Integer> getButacasSeleccionadas() {
+        return seleccionadas;
+    }
 
     static class ButacaViewHolder extends RecyclerView.ViewHolder {
-        MaterialCardView card;
-        TextView tvNumero;
+        TextView tvNumeroButaca;
+        MaterialCardView cardButaca;
+
         public ButacaViewHolder(@NonNull View itemView) {
             super(itemView);
-            card = itemView.findViewById(R.id.cardButaca);
-            tvNumero = itemView.findViewById(R.id.tvNumeroButaca);
+            tvNumeroButaca = itemView.findViewById(R.id.tvNumeroButaca);
+            cardButaca = itemView.findViewById(R.id.cardButaca);
         }
     }
 }

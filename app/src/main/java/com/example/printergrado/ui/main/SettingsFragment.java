@@ -38,14 +38,26 @@ public class SettingsFragment extends Fragment {
         LinearLayout btnLicencia = view.findViewById(R.id.btnLicencia);
         LinearLayout btnEliminar = view.findViewById(R.id.btnEliminarCuentaSettings);
 
+        LinearLayout btnGestionCine = view.findViewById(R.id.btnGestionCine);
+        View separadorGestion = view.findViewById(R.id.separadorGestionCine);
+
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
+        String rol = prefs.getString("rol", "Usuario");
+
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        // 1. CLICK LICENCIA
-        btnLicencia.setOnClickListener(v -> mostrarDialogoLicencia());
+        if ("Admin".equals(rol)) {
+            btnGestionCine.setVisibility(View.VISIBLE);
+            separadorGestion.setVisibility(View.VISIBLE);
 
-        // 2. CLICK ELIMINAR CUENTA
+            btnGestionCine.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), AdminDashboardActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        btnLicencia.setOnClickListener(v -> mostrarDialogoLicencia());
         btnEliminar.setOnClickListener(v -> mostrarDialogoEliminarCuenta());
 
         return view;

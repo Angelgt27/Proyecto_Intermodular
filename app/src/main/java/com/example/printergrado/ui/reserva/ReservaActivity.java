@@ -31,6 +31,7 @@ import com.example.printergrado.viewmodel.ReservaViewModel;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +43,7 @@ import retrofit2.Response;
 public class ReservaActivity extends AppCompatActivity {
 
     private TextView tvTitulo, tvGenero, tvDuracion, tvSinopsis, btnVolver;
-    private ImageView ivCartel; // AÑADIDO
+    private ImageView ivCartel;
     private AutoCompleteTextView spinnerCine, spinnerFecha, spinnerHora;
     private View layoutFecha, layoutHora, tvInstruccionButacas, viewPantalla;
     private RecyclerView rvButacas;
@@ -60,13 +61,12 @@ public class ReservaActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_reserva);
 
-        // Enlaces UI
         btnVolver = findViewById(R.id.btnVolverReserva);
         tvTitulo = findViewById(R.id.tvTituloReserva);
         tvGenero = findViewById(R.id.tvGeneroReserva);
         tvDuracion = findViewById(R.id.tvDuracionReserva);
         tvSinopsis = findViewById(R.id.tvSinopsisReserva);
-        ivCartel = findViewById(R.id.ivCartelReserva); // AÑADIDO
+        ivCartel = findViewById(R.id.ivCartelReserva);
         spinnerCine = findViewById(R.id.spinnerCine);
         spinnerFecha = findViewById(R.id.spinnerFecha);
         spinnerHora = findViewById(R.id.spinnerHora);
@@ -87,7 +87,6 @@ public class ReservaActivity extends AppCompatActivity {
 
         btnVolver.setOnClickListener(v -> finish());
 
-        // Cargar datos del Intent
         if (getIntent() != null) {
             idPelicula = getIntent().getIntExtra("ID_PELICULA", 1);
             String titulo = getIntent().getStringExtra("TITULO");
@@ -99,7 +98,6 @@ public class ReservaActivity extends AppCompatActivity {
             String sinopsis = getIntent().getStringExtra("SINOPSIS");
             if (sinopsis != null) tvSinopsis.setText(sinopsis);
 
-            // --- NUEVO: Cargar la imagen ---
             String imagenBase64 = getIntent().getStringExtra("IMAGEN");
             if (imagenBase64 != null && !imagenBase64.isEmpty()) {
                 try {
@@ -113,7 +111,6 @@ public class ReservaActivity extends AppCompatActivity {
         }
 
         reservaViewModel = new ViewModelProvider(this).get(ReservaViewModel.class);
-
         reservaViewModel.getMensajeReserva().observe(this, mensaje -> {
             if (mensaje != null) {
                 Toast.makeText(ReservaActivity.this, mensaje, Toast.LENGTH_LONG).show();
@@ -129,9 +126,9 @@ public class ReservaActivity extends AppCompatActivity {
         btnComprar.setOnClickListener(v -> realizarCompra());
     }
 
-    private void cargarSesiones() { /* ... igual que antes ... */
+    private void cargarSesiones() {
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        apiService.getSesionesPelicula(idPelicula).enqueue(new Callback<List<Sesion>>() {
+        apiService.getSesionesPelicula(idPelicula, false).enqueue(new Callback<List<Sesion>>() {
             @Override
             public void onResponse(Call<List<Sesion>> call, Response<List<Sesion>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
@@ -148,7 +145,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void configurarSelectorCine() { /* ... igual que antes ... */
+    private void configurarSelectorCine() {
         Set<String> cines = new HashSet<>();
         for (Sesion s : todasLasSesiones) cines.add(s.getCine());
 
@@ -167,7 +164,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void filtrarFechas(String cine) { /* ... igual que antes ... */
+    private void filtrarFechas(String cine) {
         Set<String> fechas = new HashSet<>();
         for (Sesion s : todasLasSesiones) {
             if (s.getCine().equals(cine)) fechas.add(s.getFecha());
@@ -183,7 +180,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void filtrarHoras(String cine, String fecha) { /* ... igual que antes ... */
+    private void filtrarHoras(String cine, String fecha) {
         List<Sesion> sesionesFinales = new ArrayList<>();
         List<String> horas = new ArrayList<>();
         for (Sesion s : todasLasSesiones) {
@@ -200,7 +197,7 @@ public class ReservaActivity extends AppCompatActivity {
         });
     }
 
-    private void ocultarMapa() { /* ... igual que antes ... */
+    private void ocultarMapa() {
         tvInstruccionButacas.setVisibility(View.GONE);
         viewPantalla.setVisibility(View.GONE);
         rvButacas.setVisibility(View.GONE);
@@ -208,7 +205,24 @@ public class ReservaActivity extends AppCompatActivity {
         btnComprar.setText("Selecciona al menos una butaca");
     }
 
-    private void cargarMapaButacas(int idSesion) { /* ... igual que antes ... */
+    // Método auxiliar para ordenar letras y números correctamente
+    private int compararAlfaNumerico(String s1, String s2) {
+        try {
+            return Integer.compare(Integer.parseInt(s1), Integer.parseInt(s2));
+        } catch (NumberFormatException e) {
+            return s1.compareTo(s2);
+        }
+    }
+
+    private int obtenerTamanoReal(String ultimoElemento, boolean esLetra) {
+        if (esLetra) {
+            return ultimoElemento.charAt(0) - 'A' + 1;
+        } else {
+            return Integer.parseInt(ultimoElemento);
+        }
+    }
+
+    private void cargarMapaButacas(int idSesion) {
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("jwt_token", "");
 
@@ -217,26 +231,54 @@ public class ReservaActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Butaca>> call, Response<List<Butaca>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Butaca> listaButacas = response.body();
+                    List<Butaca> listaButacasReales = response.body();
+
+                    if (listaButacasReales.isEmpty()) {
+                        Toast.makeText(ReservaActivity.this, "Esta sala no tiene butacas configuradas", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     tvInstruccionButacas.setVisibility(View.VISIBLE);
                     viewPantalla.setVisibility(View.VISIBLE);
                     rvButacas.setVisibility(View.VISIBLE);
 
-                    int numColumnas = 0;
-                    if (!listaButacas.isEmpty()) {
-                        String primeraFila = listaButacas.get(0).getFila();
-                        for (Butaca b : listaButacas) {
-                            if (b.getFila().equals(primeraFila)) {
-                                numColumnas++;
+                    List<String> filas = new ArrayList<>();
+                    List<String> columnas = new ArrayList<>();
+                    for (Butaca b : listaButacasReales) {
+                        if (!filas.contains(b.getFila())) filas.add(b.getFila());
+                        if (!columnas.contains(b.getColumna())) columnas.add(b.getColumna());
+                    }
+
+                    Collections.sort(filas, (s1, s2) -> compararAlfaNumerico(s1, s2));
+                    Collections.sort(columnas, (s1, s2) -> compararAlfaNumerico(s1, s2));
+
+                    boolean filasLetras = !Character.isDigit(filas.get(0).charAt(0));
+                    boolean columnasLetras = !Character.isDigit(columnas.get(0).charAt(0));
+
+                    // REPARACIÓN COLUMNA FANTASMA
+                    int numFilas = obtenerTamanoReal(filas.get(filas.size() - 1), filasLetras);
+                    int numColumnasGrid = obtenerTamanoReal(columnas.get(columnas.size() - 1), columnasLetras);
+
+                    rvButacas.setLayoutManager(new GridLayoutManager(ReservaActivity.this, numColumnasGrid));
+
+                    List<Butaca> cuadriculaCompleta = new ArrayList<>();
+                    for (int i = 0; i < numFilas; i++) {
+                        String f = filasLetras ? String.valueOf((char)('A' + i)) : String.valueOf(i + 1);
+                        for (int j = 0; j < numColumnasGrid; j++) {
+                            String c = columnasLetras ? String.valueOf((char)('A' + j)) : String.valueOf(j + 1);
+
+                            Butaca butacaEncontrada = null;
+                            for (Butaca b : listaButacasReales) {
+                                if (b.getFila().equals(f) && b.getColumna().equals(c)) {
+                                    butacaEncontrada = b;
+                                    break;
+                                }
                             }
+                            cuadriculaCompleta.add(butacaEncontrada);
                         }
                     }
-                    if (numColumnas == 0) numColumnas = 10;
 
-                    rvButacas.setLayoutManager(new GridLayoutManager(ReservaActivity.this, numColumnas));
-
-                    butacaAdapter = new ButacaAdapter(listaButacas, cantidad -> {
+                    butacaAdapter = new ButacaAdapter(cuadriculaCompleta, cantidad -> {
                         if (cantidad > 0) {
                             btnComprar.setEnabled(true);
                             btnComprar.setBackgroundColor(getResources().getColor(R.color.rojo_cine));
@@ -251,11 +293,13 @@ public class ReservaActivity extends AppCompatActivity {
                     rvButacas.setAdapter(butacaAdapter);
                 }
             }
-            @Override public void onFailure(Call<List<Butaca>> call, Throwable t) {}
+            @Override public void onFailure(Call<List<Butaca>> call, Throwable t) {
+                Toast.makeText(ReservaActivity.this, "Error cargando butacas", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
-    private void realizarCompra() { /* ... igual que antes ... */
+    private void realizarCompra() {
         if (idSesionFinal == -1 || butacaAdapter == null) return;
 
         List<Integer> butacasElegidas = butacaAdapter.getButacasSeleccionadas();

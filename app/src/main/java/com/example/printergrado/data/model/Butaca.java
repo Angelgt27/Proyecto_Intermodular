@@ -1,17 +1,25 @@
 package com.example.printergrado.data.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Butaca {
-    private int id_butaca;
+
+    @SerializedName("id_butaca")
+    private int idButaca;
+
     private String fila;
-    private String numero;
+
+    @SerializedName("columna_grid")
+    private String columna;
+
+    @SerializedName("numero_comercial")
+    private int numeroComercial;
+
     private boolean ocupada;
-    private boolean seleccionada; // Estado local para saber si la hemos pulsado
 
-    public int getIdButaca() { return id_butaca; }
+    public int getIdButaca() { return idButaca; }
     public String getFila() { return fila; }
-    public String getNumero() { return numero; }
+    public String getColumna() { return columna; }
+    public int getNumeroComercial() { return numeroComercial; }
     public boolean isOcupada() { return ocupada; }
-
-    public boolean isSeleccionada() { return seleccionada; }
-    public void setSeleccionada(boolean seleccionada) { this.seleccionada = seleccionada; }
 }
