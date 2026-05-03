@@ -20,12 +20,16 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Fecha (YYYY-MM-DD)"
+        android:hint="Seleccionar Fecha"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_calendar"
         app:boxStrokeColor="@color/rojo_cine">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etFechaSesion"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -33,40 +37,78 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Hora (HH:MM)"
+        android:hint="Seleccionar Hora"
+        app:endIconMode="custom"
+        app:endIconDrawable="@android:drawable/ic_menu_recent_history"
         app:boxStrokeColor="@color/rojo_cine">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etHoraSesion"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRestarPrecio"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="-"
+            android:textSize="20sp"
+            app:strokeColor="@color/gris_claro_borde"
+            android:textColor="@color/rojo_cine"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:hint="Precio (€)"
+            app:boxStrokeColor="@color/rojo_cine">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPrecioSesion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:gravity="center"
+                android:text="8.00"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSumarPrecio"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="+"
+            android:textSize="20sp"
+            app:strokeColor="@color/gris_claro_borde"
+            android:textColor="@color/rojo_cine"/>
+    </LinearLayout>
+
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Precio (€)"
+        android:hint="Seleccionar Sala"
         app:boxStrokeColor="@color/rojo_cine">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPrecioSesion"
+        <AutoCompleteTextView
+            android:id="@+id/spinnerSalaSesion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="ID Sala (Ej: 1)"
-        app:boxStrokeColor="@color/rojo_cine">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etSalaSesion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"/>
+            android:inputType="none"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

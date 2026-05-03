@@ -25,6 +25,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.printergrado.R;
 import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.viewmodel.MainViewModel;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -45,8 +46,8 @@ public class HomeFragment extends Fragment {
     private TextInputEditText etFiltroFecha;
     private AutoCompleteTextView spinnerFiltroCine;
     private FloatingActionButton fabAgregarPelicula;
+    private MaterialButton btnLimpiarFiltros; // AÑADIDO
 
-    // Lo hacemos variable de clase para usarlo en onResume
     private boolean isAdmin = false;
 
     @Nullable
@@ -60,6 +61,7 @@ public class HomeFragment extends Fragment {
         etFiltroFecha = view.findViewById(R.id.etFiltroFecha);
         spinnerFiltroCine = view.findViewById(R.id.spinnerFiltroCine);
         fabAgregarPelicula = view.findViewById(R.id.fabAgregarPelicula);
+        btnLimpiarFiltros = view.findViewById(R.id.btnLimpiarFiltros); // AÑADIDO
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String rol = prefs.getString("rol", "Usuario");
@@ -77,18 +79,34 @@ public class HomeFragment extends Fragment {
         spinnerFiltroCine.setAdapter(adapterCines);
         spinnerFiltroCine.setText("Todos", false);
 
+        // --- LÓGICA DE FILTROS ---
+
+        // 1. Al cambiar el texto, filtramos en local
+        etFiltroNombre.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) { filtrarPeliculas(); }
+        });
+
+        // 2. Al seleccionar cine, filtramos en local
+        spinnerFiltroCine.setOnItemClickListener((parent, view1, position, id) -> filtrarPeliculas());
+
+        // 3. Al seleccionar Fecha, recargamos de internet con el filtro
         etFiltroFecha.setOnClickListener(v -> {
             Calendar cal = Calendar.getInstance();
             new DatePickerDialog(requireContext(), (vista, year, month, dayOfMonth) -> {
                 String fecha = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
                 etFiltroFecha.setText(fecha);
+                aplicarFiltroDeRed(); // Pide datos al backend
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
         });
 
-        etFiltroNombre.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { filtrarPeliculas(); }
+        // 4. Limpiar Filtros
+        btnLimpiarFiltros.setOnClickListener(v -> {
+            etFiltroNombre.setText("");
+            etFiltroFecha.setText("");
+            spinnerFiltroCine.setText("Todos", false);
+            aplicarFiltroDeRed(); // Refresca todo sin fecha
         });
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
@@ -105,12 +123,8 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        // Configurar Observadores
         mainViewModel.getPeliculas().observe(getViewLifecycleOwner(), peliculas -> {
-            Log.d("DEPURACION", "4. Observer disparado en HomeFragment.");
-            if (swipeRefreshLayout.isRefreshing()) {
-                swipeRefreshLayout.setRefreshing(false);
-            }
+            if (swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
             if (peliculas != null) {
                 todasLasPeliculas = peliculas;
                 filtrarPeliculas();
@@ -123,38 +137,46 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            mainViewModel.cargarPeliculas(isAdmin);
-        });
+        swipeRefreshLayout.setOnRefreshListener(this::aplicarFiltroDeRed);
 
         return view;
     }
 
-    // --- CLAVE: Cargamos datos cada vez que el fragmento vuelve a ser visible ---
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("DEPURACION", "HomeFragment onResume: Recargando peliculas...");
-
-        // Ponemos la animación de carga
-        swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
-
-        // Pedimos los datos (esto detectará cambios hechos en AdminFormularioActivity)
-        mainViewModel.cargarPeliculas(isAdmin);
+        aplicarFiltroDeRed();
     }
 
+    // Pide la lista de películas al servidor usando la fecha seleccionada
+    private void aplicarFiltroDeRed() {
+        String fechaSeleccionada = etFiltroFecha.getText() != null ? etFiltroFecha.getText().toString().trim() : "";
+        if (fechaSeleccionada.isEmpty()) fechaSeleccionada = null; // Enviar null si no hay fecha
+
+        swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
+        mainViewModel.cargarPeliculas(isAdmin, fechaSeleccionada);
+    }
+
+    // Filtra localmente por nombre y por ID de cine sin hacer gasto de red
     private void filtrarPeliculas() {
         String textoBuscado = etFiltroNombre.getText() != null ? etFiltroNombre.getText().toString().toLowerCase().trim() : "";
+        String cineSeleccionado = spinnerFiltroCine.getText().toString();
+
+        Integer cineId = null;
+        if (cineSeleccionado.contains("Yelmo")) cineId = 1;
+        else if (cineSeleccionado.contains("Cinesa")) cineId = 2;
+        else if (cineSeleccionado.contains("Kinepolis")) cineId = 3;
+
         List<Pelicula> listaFiltrada = new ArrayList<>();
 
         for (Pelicula pelicula : todasLasPeliculas) {
-            String titulo = pelicula.getTitulo();
-            if (titulo != null && titulo.toLowerCase().contains(textoBuscado)) {
+            boolean matchNombre = pelicula.getTitulo() != null && pelicula.getTitulo().toLowerCase().contains(textoBuscado);
+            boolean matchCine = (cineId == null || pelicula.getFkCine() == cineId);
+
+            if (matchNombre && matchCine) {
                 listaFiltrada.add(pelicula);
             }
         }
-
-        Log.d("DEPURACION", "5. Dibujando " + listaFiltrada.size() + " peliculas en pantalla.");
         adapter.setPeliculas(listaFiltrada);
     }
 }

@@ -30,13 +30,8 @@ public interface ApiService {
     Call<AuthResponse> loginUsuario(@Body LoginRequest request);
 
     @GET("api/peliculas")
-    Call<List<Pelicula>> getPeliculas(@retrofit2.http.Query("admin") boolean isAdmin);
+    Call<List<Pelicula>> getPeliculas(@retrofit2.http.Query("admin") boolean isAdmin, @retrofit2.http.Query("fecha") String fecha);
 
-    // Antiguo método de reserva
-    @POST("api/reservas")
-    Call<ReservaResponse> crearReserva(@Header("Authorization") String token, @Body ReservaRequest request);
-
-    // NUEVO MÉTODO DE RESERVA (Acepta la lista de IDs de butacas)
     @POST("api/reservas")
     Call<ReservaResponse> crearReservaConButacas(@Header("Authorization") String token, @Body Map<String, Object> request);
 
@@ -85,4 +80,7 @@ public interface ApiService {
 
     @DELETE("api/sesiones/{id}")
     Call<ReservaResponse> eliminarSesion(@Header("Authorization") String token, @Path("id") int idSesion);
+
+    @GET("api/salas")
+    Call<List<com.example.printergrado.data.model.Sala>> getSalas(@Header("Authorization") String token);
 }
