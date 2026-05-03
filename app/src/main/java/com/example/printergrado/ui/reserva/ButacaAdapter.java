@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.printergrado.R;
 import com.example.printergrado.data.model.Butaca;
-import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +33,7 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
     @NonNull
     @Override
     public ButacaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Apuntamos al archivo unificado
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_butaca, parent, false);
         return new ButacaViewHolder(view);
     }
@@ -42,7 +42,7 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
     public void onBindViewHolder(@NonNull ButacaViewHolder holder, int position) {
         Butaca butaca = listaButacas.get(position);
 
-        // Si es un pasillo/hueco (eliminado por el admin), ocultar
+        // Si es un pasillo/hueco, ocultar
         if (butaca == null) {
             holder.itemView.setVisibility(View.INVISIBLE);
             holder.itemView.setOnClickListener(null);
@@ -50,29 +50,21 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
         }
 
         holder.itemView.setVisibility(View.VISIBLE);
+        holder.tvButaca.setText(butaca.getFila() + "-" + butaca.getNumeroComercial());
 
-        // TEXTO: Usamos el guion para separar, ej: "1-A"
-        holder.tvNumeroButaca.setText(butaca.getFila() + "-" + butaca.getColumna());
-
-        // --- LÓGICA DE COLORES CORREGIDA ---
+        // LÓGICA DE COLORES DIRECTAMENTE EN EL TEXTVIEW
         if (butaca.isOcupada()) {
-            // Ya está vendida a alguien
-            holder.cardButaca.setCardBackgroundColor(Color.parseColor("#9E9E9E")); // GRIS (Ocupado)
-            holder.tvNumeroButaca.setTextColor(Color.WHITE);
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#9E9E9E")); // GRIS
             holder.itemView.setOnClickListener(null);
         } else if (seleccionadas.contains(butaca.getIdButaca())) {
-            // El usuario la ha tocado para comprarla
-            holder.cardButaca.setCardBackgroundColor(Color.parseColor("#E53935")); // ROJO (Seleccionada)
-            holder.tvNumeroButaca.setTextColor(Color.WHITE);
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935")); // ROJO
             holder.itemView.setOnClickListener(v -> {
                 seleccionadas.remove(Integer.valueOf(butaca.getIdButaca()));
                 notifyItemChanged(position);
                 listener.onSeleccionCambiada(seleccionadas.size());
             });
         } else {
-            // Está libre para ser comprada (Estado por defecto)
-            holder.cardButaca.setCardBackgroundColor(Color.parseColor("#4CAF50")); // VERDE (Libre)
-            holder.tvNumeroButaca.setTextColor(Color.WHITE);
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50")); // VERDE
             holder.itemView.setOnClickListener(v -> {
                 seleccionadas.add(butaca.getIdButaca());
                 notifyItemChanged(position);
@@ -91,13 +83,12 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
     }
 
     static class ButacaViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNumeroButaca;
-        MaterialCardView cardButaca;
+        TextView tvButaca;
 
         public ButacaViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvNumeroButaca = itemView.findViewById(R.id.tvNumeroButaca);
-            cardButaca = itemView.findViewById(R.id.cardButaca);
+            // Referenciamos el ID del nuevo diseño
+            tvButaca = itemView.findViewById(R.id.tvButaca);
         }
     }
 }

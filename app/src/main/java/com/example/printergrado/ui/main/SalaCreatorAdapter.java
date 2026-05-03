@@ -19,10 +19,9 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
 
     public SalaCreatorAdapter(List<ButacaTemporal> matriz) {
         this.matriz = matriz;
-        recalcularNumeros(); // Calculamos la primera vez
+        recalcularNumeros();
     }
 
-    // MAGIA EN TIEMPO REAL: Recalcula los números seguidos ignorando huecos
     private void recalcularNumeros() {
         Map<String, Integer> contadoresFila = new HashMap<>();
         for (ButacaTemporal b : matriz) {
@@ -37,7 +36,8 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_butaca_creator, parent, false);
+        // Ahora usamos el mismo archivo unificado que la reserva
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_butaca, parent, false);
         return new ViewHolder(v);
     }
 
@@ -46,19 +46,18 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
         ButacaTemporal b = matriz.get(position);
 
         if (b.isActiva()) {
-            // VERDE: Muestra el nombre recalculado (Ej: A-1, A-2...)
             holder.tvButaca.setText(b.getFila() + "-" + b.getNumeroComercial());
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50"));
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50")); // VERDE
         } else {
-            // ROJO: Borra el texto porque es un hueco/pasillo
             holder.tvButaca.setText("");
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935"));
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935")); // ROJO
         }
 
-        holder.tvButaca.setOnClickListener(v -> {
+        // El clic se aplica sobre todo el ítem
+        holder.itemView.setOnClickListener(v -> {
             b.setActiva(!b.isActiva());
-            recalcularNumeros(); // Recalcula toda la matriz
-            notifyDataSetChanged(); // Refresca toda la vista de golpe
+            recalcularNumeros();
+            notifyDataSetChanged();
         });
     }
 
@@ -68,9 +67,11 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvButaca;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvButaca = itemView.findViewById(R.id.tvButacaCreator);
+            // El mismo ID que en la reserva
+            tvButaca = itemView.findViewById(R.id.tvButaca);
         }
     }
 }
