@@ -49,10 +49,23 @@ public class ProfileFragment extends Fragment {
         LinearLayout btnCambiarNombre = view.findViewById(R.id.btnCambiarNombre);
         LinearLayout btnHistorialReservas = view.findViewById(R.id.btnHistorialReservas);
         LinearLayout btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
+        View separadorHistorial = view.findViewById(R.id.separadorHistorial); // Obtenemos la línea
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
+
+        // RECUPERAMOS EL ROL PARA SABER SI ES ADMIN
+        String rol = prefs.getString("rol", "Usuario");
+
         apiService = ApiClient.getClient().create(ApiService.class);
+
+        // OCULTAMOS EL HISTORIAL SI ES ADMINISTRADOR
+        if ("Admin".equals(rol)) {
+            btnHistorialReservas.setVisibility(View.GONE);
+            if (separadorHistorial != null) {
+                separadorHistorial.setVisibility(View.GONE);
+            }
+        }
 
         // 1. CARGAR DATOS AL ABRIR LA PESTAÑA
         cargarPerfil();

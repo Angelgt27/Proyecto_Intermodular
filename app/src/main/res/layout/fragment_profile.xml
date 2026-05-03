@@ -83,7 +83,11 @@
             android:textColor="@color/gris_oscuro" />
     </LinearLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F0F0F0" />
+    <View
+        android:id="@+id/separadorHistorial"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F0F0F0" />
 
     <LinearLayout
         android:id="@+id/btnCerrarSesion"

@@ -57,7 +57,6 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
         String info = "Fecha: " + ticket.getFecha() + " • Hora: " + ticket.getHora();
         holder.tvDescripcion.setText(info);
 
-        // --- NUEVO: Decodificar y mostrar el póster ---
         if (ticket.getImagen() != null && !ticket.getImagen().isEmpty()) {
             try {
                 byte[] decoded = Base64.decode(ticket.getImagen(), Base64.DEFAULT);

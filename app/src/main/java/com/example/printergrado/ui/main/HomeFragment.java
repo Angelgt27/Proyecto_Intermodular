@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +45,7 @@ public class HomeFragment extends Fragment {
     private TextInputEditText etFiltroFecha;
     private AutoCompleteTextView spinnerFiltroCine;
     private FloatingActionButton fabAgregarPelicula;
-    private MaterialButton btnLimpiarFiltros; // AÑADIDO
+    private MaterialButton btnLimpiarFiltros;
 
     private boolean isAdmin = false;
 
@@ -61,7 +60,7 @@ public class HomeFragment extends Fragment {
         etFiltroFecha = view.findViewById(R.id.etFiltroFecha);
         spinnerFiltroCine = view.findViewById(R.id.spinnerFiltroCine);
         fabAgregarPelicula = view.findViewById(R.id.fabAgregarPelicula);
-        btnLimpiarFiltros = view.findViewById(R.id.btnLimpiarFiltros); // AÑADIDO
+        btnLimpiarFiltros = view.findViewById(R.id.btnLimpiarFiltros);
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String rol = prefs.getString("rol", "Usuario");
@@ -81,32 +80,29 @@ public class HomeFragment extends Fragment {
 
         // --- LÓGICA DE FILTROS ---
 
-        // 1. Al cambiar el texto, filtramos en local
         etFiltroNombre.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) { filtrarPeliculas(); }
         });
 
-        // 2. Al seleccionar cine, filtramos en local
         spinnerFiltroCine.setOnItemClickListener((parent, view1, position, id) -> filtrarPeliculas());
 
-        // 3. Al seleccionar Fecha, recargamos de internet con el filtro
         etFiltroFecha.setOnClickListener(v -> {
             Calendar cal = Calendar.getInstance();
             new DatePickerDialog(requireContext(), (vista, year, month, dayOfMonth) -> {
-                String fecha = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
+                // MODIFICADO: Ahora el formato es explícitamente DD-MM-YYYY
+                String fecha = String.format(Locale.getDefault(), "%02d-%02d-%04d", dayOfMonth, month + 1, year);
                 etFiltroFecha.setText(fecha);
                 aplicarFiltroDeRed(); // Pide datos al backend
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
         });
 
-        // 4. Limpiar Filtros
         btnLimpiarFiltros.setOnClickListener(v -> {
             etFiltroNombre.setText("");
             etFiltroFecha.setText("");
             spinnerFiltroCine.setText("Todos", false);
-            aplicarFiltroDeRed(); // Refresca todo sin fecha
+            aplicarFiltroDeRed();
         });
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
@@ -148,16 +144,14 @@ public class HomeFragment extends Fragment {
         aplicarFiltroDeRed();
     }
 
-    // Pide la lista de películas al servidor usando la fecha seleccionada
     private void aplicarFiltroDeRed() {
         String fechaSeleccionada = etFiltroFecha.getText() != null ? etFiltroFecha.getText().toString().trim() : "";
-        if (fechaSeleccionada.isEmpty()) fechaSeleccionada = null; // Enviar null si no hay fecha
+        if (fechaSeleccionada.isEmpty()) fechaSeleccionada = null;
 
         swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
         mainViewModel.cargarPeliculas(isAdmin, fechaSeleccionada);
     }
 
-    // Filtra localmente por nombre y por ID de cine sin hacer gasto de red
     private void filtrarPeliculas() {
         String textoBuscado = etFiltroNombre.getText() != null ? etFiltroNombre.getText().toString().toLowerCase().trim() : "";
         String cineSeleccionado = spinnerFiltroCine.getText().toString();
