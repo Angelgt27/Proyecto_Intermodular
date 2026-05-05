@@ -8,12 +8,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -29,7 +33,9 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -43,12 +49,17 @@ public class AdminFormularioActivity extends AppCompatActivity {
     private TextView tvTituloToolbar;
     private ImageView ivPreview;
 
-    private int peliculaId = -1; // -1 significa crear nueva
-    private String imagenBase64 = null; // Guardará la foto convertida
+    private View layoutCineForm;
+    private AutoCompleteTextView spinnerCineForm;
+    private List<Map<String, Object>> listaCinesDescargados = new ArrayList<>();
+    private int idCineSeleccionado = -1;
+    private boolean isSuperAdmin = false;
+
+    private int peliculaId = -1;
+    private String imagenBase64 = null;
     private ApiService apiService;
     private String token;
 
-    // Lanzador para abrir la galería de fotos
     private final ActivityResultLauncher<String> selectorImagen = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
@@ -62,7 +73,6 @@ public class AdminFormularioActivity extends AppCompatActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_admin_formulario);
 
-        // Configuración visual (padding notch/cámara)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             View barraSuperior = findViewById(R.id.barraSuperiorForm);
@@ -71,7 +81,6 @@ public class AdminFormularioActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-        // Referencias UI
         etTitulo = findViewById(R.id.etTituloPelicula);
         etGenero = findViewById(R.id.etGeneroPelicula);
         etDuracion = findViewById(R.id.etDuracionPelicula);
@@ -81,6 +90,9 @@ public class AdminFormularioActivity extends AppCompatActivity {
         tvTituloToolbar = findViewById(R.id.tvTituloToolbar);
         ivPreview = findViewById(R.id.ivPreviewPelicula);
 
+        layoutCineForm = findViewById(R.id.layoutCineForm);
+        spinnerCineForm = findViewById(R.id.spinnerCineForm);
+
         findViewById(R.id.btnVolverForm).setOnClickListener(v -> finish());
         findViewById(R.id.btnSeleccionarImagen).setOnClickListener(v -> selectorImagen.launch("image/*"));
 
@@ -88,8 +100,10 @@ public class AdminFormularioActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
 
-        // Cargar datos si estamos en modo Edición
+        isSuperAdmin = "Superadmin".equals(prefs.getString("rol", "Usuario"));
+
         if (getIntent() != null && getIntent().hasExtra("ID_PELICULA")) {
+            // MODO EDICIÓN
             peliculaId = getIntent().getIntExtra("ID_PELICULA", -1);
             tvTituloToolbar.setText("Editar Película");
             etTitulo.setText(getIntent().getStringExtra("TITULO"));
@@ -97,40 +111,87 @@ public class AdminFormularioActivity extends AppCompatActivity {
             etDuracion.setText(String.valueOf(getIntent().getIntExtra("DURACION", 0)));
             etSinopsis.setText(getIntent().getStringExtra("SINOPSIS"));
 
-            // Si la peli ya tenía imagen, la decodificamos
             String imgActual = getIntent().getStringExtra("IMAGEN");
             if (imgActual != null && !imgActual.isEmpty()) {
                 try {
                     byte[] decoded = Base64.decode(imgActual, Base64.DEFAULT);
                     Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
                     ivPreview.setImageBitmap(bitmap);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                } catch (Exception e) { e.printStackTrace(); }
             }
-
-            btnEliminar.setVisibility(View.VISIBLE); // Mostrar botón eliminar
+            btnEliminar.setVisibility(View.VISIBLE);
+            layoutCineForm.setVisibility(View.GONE); // Ocultamos selector si estamos editando
+        } else {
+            // MODO CREACIÓN
+            if (isSuperAdmin) {
+                layoutCineForm.setVisibility(View.VISIBLE);
+                cargarCines();
+            }
         }
 
         btnGuardar.setOnClickListener(v -> guardarPelicula());
         btnEliminar.setOnClickListener(v -> eliminarPelicula());
     }
 
+    private void cargarCines() {
+        apiService.getTodosLosCines().enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listaCinesDescargados = response.body();
+                    final List<String> nombresCines = new ArrayList<>();
+                    for (Map<String, Object> c : listaCinesDescargados) {
+                        nombresCines.add(String.valueOf(c.get("nombre")));
+                    }
+
+                    if (!nombresCines.isEmpty()) {
+                        // Filtro nulo para evitar que el AutoComplete oculte opciones
+                        ArrayAdapter<String> adp = new ArrayAdapter<String>(AdminFormularioActivity.this, android.R.layout.simple_dropdown_item_1line, nombresCines) {
+                            @NonNull
+                            @Override
+                            public Filter getFilter() {
+                                return new Filter() {
+                                    @Override
+                                    protected FilterResults performFiltering(CharSequence constraint) {
+                                        FilterResults results = new FilterResults();
+                                        results.values = nombresCines;
+                                        results.count = nombresCines.size();
+                                        return results;
+                                    }
+                                    @Override
+                                    protected void publishResults(CharSequence constraint, FilterResults results) {
+                                        notifyDataSetChanged();
+                                    }
+                                };
+                            }
+                        };
+
+                        spinnerCineForm.setAdapter(adp);
+
+                        // Autoseleccionar el primero por defecto
+                        spinnerCineForm.setText(nombresCines.get(0), false);
+                        idCineSeleccionado = ((Double) listaCinesDescargados.get(0).get("id_cine")).intValue();
+
+                        spinnerCineForm.setOnItemClickListener((parent, view, position, id) -> {
+                            idCineSeleccionado = ((Double) listaCinesDescargados.get(position).get("id_cine")).intValue();
+                        });
+                    }
+                }
+            }
+            @Override public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
+        });
+    }
+
     private void processImage(Uri uri) {
         try {
             InputStream is = getContentResolver().openInputStream(uri);
             Bitmap bitmap = BitmapFactory.decodeStream(is);
-
-            // Redimensionamos la imagen a tamaño "cartel" para no colapsar la BD
             Bitmap resized = Bitmap.createScaledBitmap(bitmap, 300, 450, true);
             ivPreview.setImageBitmap(resized);
-
-            // Convertimos a Base64
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            resized.compress(Bitmap.CompressFormat.JPEG, 70, baos); // Calidad 70%
+            resized.compress(Bitmap.CompressFormat.JPEG, 70, baos);
             byte[] imageBytes = baos.toByteArray();
             imagenBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
-
         } catch (Exception e) {
             Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
         }
@@ -143,7 +204,7 @@ public class AdminFormularioActivity extends AppCompatActivity {
         datos.put("sinopsis", etSinopsis.getText().toString());
 
         if (imagenBase64 != null) {
-            datos.put("imagen", imagenBase64); // Se envía solo si ha cambiado
+            datos.put("imagen", imagenBase64);
         }
 
         try {
@@ -153,23 +214,25 @@ public class AdminFormularioActivity extends AppCompatActivity {
             return;
         }
 
+        if (isSuperAdmin && peliculaId == -1) {
+            if (idCineSeleccionado == -1) {
+                Toast.makeText(this, "Por favor, selecciona un cine", Toast.LENGTH_SHORT).show();
+                return;
+            } else {
+                datos.put("fk_cine", idCineSeleccionado);
+            }
+        }
+
         btnGuardar.setEnabled(false);
 
         if (peliculaId == -1) {
-            // CREAR NUEVA
             apiService.crearPelicula(token, datos).enqueue(new Callback<ReservaResponse>() {
-                @Override
-                public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
-                    gestionarRespuesta(response);
-                }
+                @Override public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) { gestionarRespuesta(response); }
                 @Override public void onFailure(Call<ReservaResponse> call, Throwable t) { errorConexion(t); }
             });
         } else {
             apiService.actualizarPelicula(token, peliculaId, datos).enqueue(new Callback<ReservaResponse>() {
-                @Override
-                public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
-                    gestionarRespuesta(response);
-                }
+                @Override public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) { gestionarRespuesta(response); }
                 @Override public void onFailure(Call<ReservaResponse> call, Throwable t) { errorConexion(t); }
             });
         }
@@ -178,10 +241,7 @@ public class AdminFormularioActivity extends AppCompatActivity {
     private void eliminarPelicula() {
         btnEliminar.setEnabled(false);
         apiService.eliminarPelicula(token, peliculaId).enqueue(new Callback<ReservaResponse>() {
-            @Override
-            public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
-                gestionarRespuesta(response);
-            }
+            @Override public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) { gestionarRespuesta(response); }
             @Override public void onFailure(Call<ReservaResponse> call, Throwable t) { errorConexion(t); }
         });
     }

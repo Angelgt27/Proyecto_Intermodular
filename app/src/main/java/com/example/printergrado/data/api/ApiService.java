@@ -102,4 +102,6 @@ public interface ApiService {
 
     @GET("api/admin/salas/{id_sala}/butacas")
     Call<List<Butaca>> getButacasSalaAdmin(@Header("Authorization") String token, @Path("id_sala") int idSala);
+    @GET("api/cines")
+    Call<List<Map<String, Object>>> getTodosLosCines();
 }

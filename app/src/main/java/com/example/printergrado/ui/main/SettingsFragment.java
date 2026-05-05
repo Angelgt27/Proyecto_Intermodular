@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,13 +46,28 @@ public class SettingsFragment extends Fragment {
         token = "Bearer " + prefs.getString("jwt_token", "");
         String rol = prefs.getString("rol", "Usuario");
 
+        boolean isAdmin = "Admin".equals(rol);
+        boolean isSuperAdmin = "Superadmin".equals(rol);
+
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        if ("Admin".equals(rol)) {
+        // Si es cualquiera de los dos admins, mostramos el botón
+        if (isAdmin || isSuperAdmin) {
             btnGestionCine.setVisibility(View.VISIBLE);
             separadorGestion.setVisibility(View.VISIBLE);
 
+            // Si es Superadmin, cambiamos el texto visualmente buscando el TextView dentro del botón
+            if (isSuperAdmin) {
+                for (int i = 0; i < btnGestionCine.getChildCount(); i++) {
+                    View child = btnGestionCine.getChildAt(i);
+                    if (child instanceof TextView) {
+                        ((TextView) child).setText("Ajustes de SuperAdministrador");
+                    }
+                }
+            }
+
             btnGestionCine.setOnClickListener(v -> {
+                // Por ahora abre el panel de Admin, en la Fase 3 lo adaptaremos
                 Intent intent = new Intent(requireContext(), AdminDashboardActivity.class);
                 startActivity(intent);
             });

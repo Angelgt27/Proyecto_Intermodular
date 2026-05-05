@@ -14,6 +14,8 @@ public class Pelicula {
 
     @SerializedName("fk_cine")
     private int fkCine;
+    @SerializedName("nombre_cine")
+    private String nombreCine;
 
     // Getters
     public int getIdPelicula() { return idPelicula; }
@@ -23,4 +25,5 @@ public class Pelicula {
     public String getSinopsis() { return sinopsis; }
     public int getFkCine() { return fkCine; }
     public String getImagen() { return imagen; }
+    public String getNombreCine() { return nombreCine; }
 }

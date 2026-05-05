@@ -33,11 +33,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // --- 1. SEGURIDAD ---
+        // --- 1. SEGURIDAD Y ROLES ---
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("jwt_token", null);
         String rol = prefs.getString("rol", "Usuario");
-        boolean isAdmin = "Admin".equals(rol); // AÑADIDO: Guardamos el booleano
+
+        boolean isAdmin = "Admin".equals(rol);
+        boolean isSuperAdmin = "Superadmin".equals(rol); // NUEVO: Identificamos al jefe
 
         if (token == null || !isTokenValido(token)) {
             prefs.edit().remove("jwt_token").apply();
@@ -61,14 +63,14 @@ public class MainActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-        // --- 3. VIEWMODEL COMPARTIDO (Solo para Toasts de error aquí) ---
+        // --- 3. VIEWMODEL COMPARTIDO ---
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         mainViewModel.getMensajes().observe(this, msj -> {
             if (msj != null) Toast.makeText(this, msj, Toast.LENGTH_SHORT).show();
         });
 
-        // Si es admin, cambiamos el texto del botón inferior
-        if (isAdmin) {
+        // Si es Admin O Superadmin, cambiamos el texto del botón inferior a "Escáner"
+        if (isAdmin || isSuperAdmin) {
             bottomNav.getMenu().findItem(R.id.nav_tickets).setTitle("Escáner");
         }
 
@@ -80,7 +82,8 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_tickets) {
-                if (isAdmin) {
+                // Ambos administradores usan el escáner de QR
+                if (isAdmin || isSuperAdmin) {
                     selectedFragment = new ScannerFragment();
                 } else {
                     selectedFragment = new TicketsFragment();
@@ -99,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Seleccionar Home por defecto si es la primera vez que arranca
         if (savedInstanceState == null) {
             bottomNav.setSelectedItemId(R.id.nav_home);
         }
