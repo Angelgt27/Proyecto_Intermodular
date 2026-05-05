@@ -32,7 +32,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         findViewById(R.id.btnVolverDashboard).setOnClickListener(v -> finish());
 
         findViewById(R.id.cardDatosCine).setOnClickListener(v -> {
-            // startActivity(new Intent(this, AdminDatosCineActivity.class));
+            startActivity(new Intent(this, AdminDatosCineActivity.class));
         });
 
         findViewById(R.id.cardGestionSalas).setOnClickListener(v -> {
