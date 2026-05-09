@@ -17,7 +17,6 @@ public class Pelicula {
     @SerializedName("nombre_cine")
     private String nombreCine;
 
-    // Getters
     public int getIdPelicula() { return idPelicula; }
     public String getTitulo() { return titulo; }
     public int getDuracion() { return duracion; }

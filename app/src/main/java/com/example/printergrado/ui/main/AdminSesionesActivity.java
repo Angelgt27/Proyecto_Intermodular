@@ -82,7 +82,8 @@ public class AdminSesionesActivity extends AppCompatActivity {
         tvTitulo.setText(tituloPelicula != null ? tituloPelicula : "Sesiones");
         findViewById(R.id.btnVolverSesiones).setOnClickListener(v -> finish());
 
-        // --- ENLACES BARRA DE FILTROS ---
+        
+
         etFiltroFecha = findViewById(R.id.etFiltroFechaSesiones);
         btnLimpiar = findViewById(R.id.btnLimpiarFiltroSesiones);
 
@@ -100,7 +101,8 @@ public class AdminSesionesActivity extends AppCompatActivity {
             filtrarSesionesLocales(null);
         });
 
-        // --- RESTO DE CONFIGURACIÓN ---
+        
+
         apiService = ApiClient.getClient().create(ApiService.class);
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
@@ -126,7 +128,8 @@ public class AdminSesionesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Sesion>> call, Response<List<Sesion>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     listaSesionesOriginal = response.body();
-                    // Al recargar, respetamos el filtro si existe
+                    
+
                     String filtroActual = etFiltroFecha.getText().toString();
                     filtrarSesionesLocales(filtroActual.isEmpty() ? null : filtroActual);
                 }

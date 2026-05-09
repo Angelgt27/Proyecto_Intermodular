@@ -52,7 +52,8 @@ public class AdminSalasListaActivity extends AppCompatActivity {
 
         findViewById(R.id.btnVolverSalasList).setOnClickListener(v -> finish());
 
-        // Obtenemos el ID si lo ha pasado el Superadmin
+        
+
         if (getIntent() != null && getIntent().hasExtra("ID_CINE")) {
             idCineSuperadmin = getIntent().getIntExtra("ID_CINE", -1);
         }
@@ -95,7 +96,8 @@ public class AdminSalasListaActivity extends AppCompatActivity {
     }
 
     private void cargarSalas() {
-        // Usamos idCineSuperadmin si no es -1, o null si es admin normal
+        
+
         apiService.getSalas(token, idCineSuperadmin != -1 ? idCineSuperadmin : null).enqueue(new Callback<List<Sala>>() {
             @Override
             public void onResponse(Call<List<Sala>> call, Response<List<Sala>> response) {

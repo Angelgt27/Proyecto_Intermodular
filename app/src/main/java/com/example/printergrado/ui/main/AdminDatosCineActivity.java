@@ -33,7 +33,8 @@ public class AdminDatosCineActivity extends AppCompatActivity {
     private ApiService apiService;
     private String token;
 
-    // Si vale -1 es un Admin normal, si tiene otro valor es Superadmin editando ese cine
+    
+
     private int idCineSuperadmin = -1;
 
     @Override
@@ -61,7 +62,8 @@ public class AdminDatosCineActivity extends AppCompatActivity {
         token = "Bearer " + prefs.getString("jwt_token", "");
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        // LOGICA DE PUENTE: Si recibimos ID, rellenamos los datos directamente
+        
+
         if (getIntent() != null && getIntent().hasExtra("ID_CINE")) {
             idCineSuperadmin = getIntent().getIntExtra("ID_CINE", -1);
             etNombre.setText(getIntent().getStringExtra("NOMBRE"));
@@ -139,7 +141,8 @@ public class AdminDatosCineActivity extends AppCompatActivity {
             }
         };
 
-        // Si es Superadmin, llama a la ruta especifica; si no, a la de Admin normal
+        
+
         if (idCineSuperadmin != -1) {
             apiService.actualizarCineSuperadmin(token, idCineSuperadmin, payload).enqueue(callback);
         } else {

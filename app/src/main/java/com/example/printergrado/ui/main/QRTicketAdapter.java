@@ -88,9 +88,11 @@ public class QRTicketAdapter extends RecyclerView.Adapter<QRTicketAdapter.QRView
 
     private void mostrarQRAmpliado(Context context, String asiento, String contenidoQR) {
         ImageView imageView = new ImageView(context);
-        imageView.setPadding(64, 64, 64, 64); // Margen para que respire
+        imageView.setPadding(64, 64, 64, 64); 
 
-        // Generamos el QR a alta resolución (800x800)
+
+        
+
         Bitmap bitmap = generarQR(contenidoQR, 800);
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);

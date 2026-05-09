@@ -53,7 +53,8 @@ public class PeliculaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             for (Pelicula p : listaPeliculasOriginal) {
                 if (!peliculasPorCine.containsKey(p.getFkCine())) {
                     peliculasPorCine.put(p.getFkCine(), new ArrayList<>());
-                    nombresRealesCines.put(p.getFkCine(), p.getNombreCine()); // Usamos el nombre real
+                    nombresRealesCines.put(p.getFkCine(), p.getNombreCine()); 
+
                 }
                 peliculasPorCine.get(p.getFkCine()).add(p);
             }

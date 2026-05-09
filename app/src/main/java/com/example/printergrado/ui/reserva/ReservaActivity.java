@@ -205,7 +205,8 @@ public class ReservaActivity extends AppCompatActivity {
         btnComprar.setText("Selecciona al menos una butaca");
     }
 
-    // Método auxiliar para ordenar letras y números correctamente
+    
+
     private int compararAlfaNumerico(String s1, String s2) {
         try {
             return Integer.compare(Integer.parseInt(s1), Integer.parseInt(s2));
@@ -255,7 +256,8 @@ public class ReservaActivity extends AppCompatActivity {
                     boolean filasLetras = !Character.isDigit(filas.get(0).charAt(0));
                     boolean columnasLetras = !Character.isDigit(columnas.get(0).charAt(0));
 
-                    // REPARACIÓN COLUMNA FANTASMA
+                    
+
                     int numFilas = obtenerTamanoReal(filas.get(filas.size() - 1), filasLetras);
                     int numColumnasGrid = obtenerTamanoReal(columnas.get(columnas.size() - 1), columnasLetras);
 

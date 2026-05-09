@@ -21,7 +21,8 @@ import retrofit2.Response;
 
 public class MainViewModel extends ViewModel {
 
-    // ÚNICAS VARIABLES NECESARIAS
+    
+
     private final MutableLiveData<List<Pelicula>> peliculasLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<Ticket>> ticketsLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> mensajeLiveData = new MutableLiveData<>();
@@ -59,13 +60,15 @@ public class MainViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     ticketsLiveData.setValue(response.body());
                 } else {
-                    // Si el servidor da error, enviamos lista vacía para que quite la rueda
+                    
+
                     ticketsLiveData.setValue(new ArrayList<>());
                 }
             }
             @Override
             public void onFailure(Call<List<Ticket>> call, Throwable t) {
-                // Si no hay red, también pasamos lista vacía y avisamos
+                
+
                 ticketsLiveData.setValue(new ArrayList<>());
                 mensajeLiveData.setValue("Problema de conexión al buscar entradas");
             }
@@ -78,7 +81,8 @@ public class MainViewModel extends ViewModel {
             public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     mensajeLiveData.setValue(response.body().getMensaje());
-                    cargarTickets(token); // Recargamos la lista automáticamente
+                    cargarTickets(token); 
+
                 }
             }
             @Override

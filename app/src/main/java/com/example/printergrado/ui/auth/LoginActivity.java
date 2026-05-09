@@ -32,21 +32,24 @@ public class LoginActivity extends AppCompatActivity {
 
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        // Enlazar vistas
+        
+
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnIniciarSesion = findViewById(R.id.btnIniciarSesion);
         btnRegistrarse = findViewById(R.id.btnRegistrarse);
         cbRecordarSesion = findViewById(R.id.cbRecordarSesion);
 
-        // Observar los mensajes (Toasts) del ViewModel
+        
+
         authViewModel.getMensajeToast().observe(this, mensaje -> {
             if (mensaje != null) {
                 Toast.makeText(LoginActivity.this, mensaje, Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Guardamos el Rol antes de viajar
+        
+
         authViewModel.getLoginRole().observe(this, rol -> {
             if (rol != null) {
                 SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
@@ -54,7 +57,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Guardamos el Token y cambiamos de pantalla
+        
+
         authViewModel.getLoginToken().observe(this, token -> {
             if (token != null) {
                 SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
@@ -70,7 +74,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Evento: Botón Iniciar Sesión
+        
+
         btnIniciarSesion.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -81,11 +86,13 @@ public class LoginActivity extends AppCompatActivity {
                 recordar = cbRecordarSesion.isChecked();
             }
 
-            // Delegar la lógica al ViewModel
+            
+
             authViewModel.login(email, password, recordar);
         });
 
-        // Evento: Botón Registrarse
+        
+
         btnRegistrarse.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);

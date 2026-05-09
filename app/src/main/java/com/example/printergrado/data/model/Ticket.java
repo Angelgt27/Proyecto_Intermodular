@@ -10,7 +10,8 @@ public class Ticket {
     private String fecha;
     private String hora;
     private String cine;
-    private String imagen; // AÑADIDO: Para recibir el póster en Base64
+    private String imagen; 
+
     private List<String> butacas;
     private List<String> qr_codes;
     @SerializedName("cantidad")
@@ -22,7 +23,8 @@ public class Ticket {
     public String getFecha() { return fecha; }
     public String getHora() { return hora; }
     public String getCine() { return cine; }
-    public String getImagen() { return imagen; } // AÑADIDO
+    public String getImagen() { return imagen; } 
+
     public String getEstado() { return estado; }
     public List<String> getButacas() { return butacas; }
     public List<String> getQrCodes() { return qr_codes; }

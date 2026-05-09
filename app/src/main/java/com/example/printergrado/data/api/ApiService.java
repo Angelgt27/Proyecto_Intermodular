@@ -131,4 +131,6 @@ public interface ApiService {
 
     @DELETE("api/superadmin/admins/{id_admin}")
     Call<ReservaResponse> eliminarAdminSuperadmin(@Header("Authorization") String token, @Path("id_admin") int idAdmin);
+    @PUT("api/usuario/password")
+    Call<ReservaResponse> cambiarPassword(@Header("Authorization") String token, @Body Map<String, String> body);
 }

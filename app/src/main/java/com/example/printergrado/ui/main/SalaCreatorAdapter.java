@@ -36,7 +36,8 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Ahora usamos el mismo archivo unificado que la reserva
+        
+
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_butaca, parent, false);
         return new ViewHolder(v);
     }
@@ -47,13 +48,16 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
 
         if (b.isActiva()) {
             holder.tvButaca.setText(b.getFila() + "-" + b.getNumeroComercial());
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50")); // VERDE
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50")); 
+
         } else {
             holder.tvButaca.setText("");
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935")); // ROJO
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935")); 
+
         }
 
-        // El clic se aplica sobre todo el ítem
+        
+
         holder.itemView.setOnClickListener(v -> {
             b.setActiva(!b.isActiva());
             recalcularNumeros();
@@ -70,7 +74,8 @@ public class SalaCreatorAdapter extends RecyclerView.Adapter<SalaCreatorAdapter.
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // El mismo ID que en la reserva
+            
+
             tvButaca = itemView.findViewById(R.id.tvButaca);
         }
     }

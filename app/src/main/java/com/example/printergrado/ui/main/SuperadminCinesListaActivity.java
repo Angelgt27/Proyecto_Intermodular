@@ -44,7 +44,8 @@ public class SuperadminCinesListaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        // Usa el mismo XML que la lista de salas, que ya tiene un RecyclerView y un FAB
+        
+
         setContentView(R.layout.activity_admin_salas_lista);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
@@ -55,7 +56,8 @@ public class SuperadminCinesListaActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-        // Cambiamos el título
+        
+
         TextView tvTitulo = findViewById(R.id.tvTituloSalasList);
         tvTitulo.setText("Gestión de Cines");
 
@@ -86,7 +88,8 @@ public class SuperadminCinesListaActivity extends AppCompatActivity {
         });
         rvCines.setAdapter(adapter);
 
-        // Al pulsar el botón flotante (+)
+        
+
         findViewById(R.id.fabAgregarSalaList).setOnClickListener(v -> mostrarDialogoCrearCine());
     }
 

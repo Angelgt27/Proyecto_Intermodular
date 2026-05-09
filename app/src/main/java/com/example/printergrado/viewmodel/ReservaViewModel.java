@@ -25,10 +25,12 @@ public class ReservaViewModel extends ViewModel {
     public LiveData<String> getMensajeReserva() { return mensajeReserva; }
     public LiveData<Boolean> getReservaExitosa() { return reservaExitosa; }
 
-    // --- NUEVO MÉTODO CON BUTACAS ---
+    
+
     public void hacerReservaConButacas(String token, int idSesion, List<Integer> idsButacas) {
 
-        // Empaquetamos los datos como Flask los espera
+        
+
         Map<String, Object> request = new HashMap<>();
         request.put("id_sesion", idSesion);
         request.put("ids_butacas", idsButacas);

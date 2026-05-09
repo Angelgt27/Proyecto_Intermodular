@@ -15,7 +15,8 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText etNombre, etEmail, etPassword, etConfirmPassword;
     private MaterialButton btnCrearCuenta, btnVolverLogin;
 
-    // Instancia del ViewModel
+    
+
     private AuthViewModel authViewModel;
 
     @Override
@@ -23,7 +24,8 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Inicializar el ViewModel
+        
+
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
         etNombre = findViewById(R.id.etRegNombre);
@@ -33,7 +35,8 @@ public class RegisterActivity extends AppCompatActivity {
         btnCrearCuenta = findViewById(R.id.btnCrearCuenta);
         btnVolverLogin = findViewById(R.id.btnVolverLogin);
 
-        // Observar los mensajes del ViewModel
+        
+
         authViewModel.getMensajeToast().observe(this, mensaje -> {
             if (mensaje != null) {
                 Toast.makeText(RegisterActivity.this, mensaje, Toast.LENGTH_SHORT).show();
@@ -46,14 +49,16 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-        // Eventos de click
+        
+
         btnCrearCuenta.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
             String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-            // Delegar la lógica al ViewModel
+            
+
             authViewModel.register(nombre, email, password, confirmPassword);
         });
 

@@ -33,13 +33,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // --- 1. SEGURIDAD Y ROLES ---
+        
+
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("jwt_token", null);
         String rol = prefs.getString("rol", "Usuario");
 
         boolean isAdmin = "Admin".equals(rol);
-        boolean isSuperAdmin = "Superadmin".equals(rol); // NUEVO: Identificamos al jefe
+        boolean isSuperAdmin = "Superadmin".equals(rol); 
+
 
         if (token == null || !isTokenValido(token)) {
             prefs.edit().remove("jwt_token").apply();
@@ -48,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // --- 2. VISTAS ---
+        
+
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_main);
 
@@ -63,18 +66,21 @@ public class MainActivity extends AppCompatActivity {
             return windowInsets;
         });
 
-        // --- 3. VIEWMODEL COMPARTIDO ---
+        
+
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         mainViewModel.getMensajes().observe(this, msj -> {
             if (msj != null) Toast.makeText(this, msj, Toast.LENGTH_SHORT).show();
         });
 
-        // Si es Admin O Superadmin, cambiamos el texto del botón inferior a "Escáner"
+        
+
         if (isAdmin || isSuperAdmin) {
             bottomNav.getMenu().findItem(R.id.nav_tickets).setTitle("Escáner");
         }
 
-        // --- 4. NAVEGACIÓN CON FRAGMENTS ---
+        
+
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
@@ -82,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_tickets) {
-                // Ambos administradores usan el escáner de QR
+                
+
                 if (isAdmin || isSuperAdmin) {
                     selectedFragment = new ScannerFragment();
                 } else {

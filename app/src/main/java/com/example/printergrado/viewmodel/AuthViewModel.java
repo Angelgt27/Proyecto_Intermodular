@@ -27,10 +27,12 @@ public class AuthViewModel extends ViewModel {
     public LiveData<Boolean> getAuthSuccess() { return authSuccess; }
     public LiveData<String> getLoginRole() { return loginRole; }
 
-    // --- LÓGICA DE LOGIN ---
+    
+
     public void login(String email, String password, boolean recordar) {
 
-        // Si los campos están vacíos, avisamos al usuario
+        
+
         if (email.isEmpty() || password.isEmpty()) {
             mensajeToast.setValue("Por favor, introduce tu correo y contraseña");
             return;
@@ -42,8 +44,10 @@ public class AuthViewModel extends ViewModel {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // ARREGLADO: Primero guardamos el rol, y DESPUÉS el token.
-                    // (Porque el token desencadena el cambio de pantalla)
+                    
+
+                    
+
                     loginRole.setValue(response.body().getRol());
                     loginToken.setValue(response.body().getAccessToken());
                 } else {
@@ -58,9 +62,11 @@ public class AuthViewModel extends ViewModel {
         });
     }
 
-    // --- LÓGICA DE REGISTRO ---
+    
+
     public void register(String nombre, String email, String password, String confirmPassword) {
-        // ARREGLADO: Si algo falla, ahora avisa por pantalla en lugar de fallar en silencio
+        
+
         if (nombre.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             mensajeToast.setValue("Por favor, rellena todos los campos");
             return;
@@ -83,7 +89,8 @@ public class AuthViewModel extends ViewModel {
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     mensajeToast.setValue(response.body().getMensaje());
-                    authSuccess.setValue(true); // Avisamos para volver al Login
+                    authSuccess.setValue(true); 
+
                 } else {
                     mensajeToast.setValue("Error al registrar: Puede que el correo ya exista.");
                 }

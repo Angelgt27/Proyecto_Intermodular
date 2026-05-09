@@ -48,7 +48,8 @@ public class HomeFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private List<Pelicula> todasLasPeliculas = new ArrayList<>();
-    private Map<String, Integer> mapaCinesFiltro = new HashMap<>(); // Vincula el Nombre con su ID real
+    private Map<String, Integer> mapaCinesFiltro = new HashMap<>(); 
+
 
     private TextInputEditText etFiltroNombre;
     private TextInputEditText etFiltroFecha;
@@ -84,7 +85,8 @@ public class HomeFragment extends Fragment {
         adapter.setRole(rol);
         rv.setAdapter(adapter);
 
-        // --- CARGAR CINES REALES PARA EL FILTRO DEL SUPERADMIN ---
+        
+
         if (isSuperAdmin) {
             ApiService apiService = ApiClient.getClient().create(ApiService.class);
             apiService.getTodosLosCines().enqueue(new Callback<List<Map<String, Object>>>() {

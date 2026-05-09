@@ -103,7 +103,8 @@ public class AdminFormularioActivity extends AppCompatActivity {
         isSuperAdmin = "Superadmin".equals(prefs.getString("rol", "Usuario"));
 
         if (getIntent() != null && getIntent().hasExtra("ID_PELICULA")) {
-            // MODO EDICIÓN
+            
+
             peliculaId = getIntent().getIntExtra("ID_PELICULA", -1);
             tvTituloToolbar.setText("Editar Película");
             etTitulo.setText(getIntent().getStringExtra("TITULO"));
@@ -120,9 +121,11 @@ public class AdminFormularioActivity extends AppCompatActivity {
                 } catch (Exception e) { e.printStackTrace(); }
             }
             btnEliminar.setVisibility(View.VISIBLE);
-            layoutCineForm.setVisibility(View.GONE); // Ocultamos selector si estamos editando
+            layoutCineForm.setVisibility(View.GONE); 
+
         } else {
-            // MODO CREACIÓN
+            
+
             if (isSuperAdmin) {
                 layoutCineForm.setVisibility(View.VISIBLE);
                 cargarCines();
@@ -145,7 +148,8 @@ public class AdminFormularioActivity extends AppCompatActivity {
                     }
 
                     if (!nombresCines.isEmpty()) {
-                        // Filtro nulo para evitar que el AutoComplete oculte opciones
+                        
+
                         ArrayAdapter<String> adp = new ArrayAdapter<String>(AdminFormularioActivity.this, android.R.layout.simple_dropdown_item_1line, nombresCines) {
                             @NonNull
                             @Override
@@ -168,7 +172,8 @@ public class AdminFormularioActivity extends AppCompatActivity {
 
                         spinnerCineForm.setAdapter(adp);
 
-                        // Autoseleccionar el primero por defecto
+                        
+
                         spinnerCineForm.setText(nombresCines.get(0), false);
                         idCineSeleccionado = ((Double) listaCinesDescargados.get(0).get("id_cine")).intValue();
 
@@ -251,7 +256,25 @@ public class AdminFormularioActivity extends AppCompatActivity {
             Toast.makeText(this, response.body().getMensaje(), Toast.LENGTH_SHORT).show();
             finish();
         } else {
-            Toast.makeText(this, "Error en la operación. Revisa los datos.", Toast.LENGTH_LONG).show();
+            
+
+            String mensajeError = "Error en la operacion. Revisa los datos.";
+
+            
+
+            try {
+                if (response.errorBody() != null) {
+                    String errorString = response.errorBody().string();
+                    org.json.JSONObject jsonObject = new org.json.JSONObject(errorString);
+                    if (jsonObject.has("error")) {
+                        mensajeError = jsonObject.getString("error");
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Toast.makeText(this, mensajeError, Toast.LENGTH_LONG).show();
             btnGuardar.setEnabled(true);
             btnEliminar.setEnabled(true);
         }

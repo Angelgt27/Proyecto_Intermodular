@@ -32,7 +32,8 @@ public class ScannerFragment extends Fragment {
     private MainViewModel mainViewModel;
     private String token;
 
-    // Permiso de cámara
+    
+
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) barcodeScannerView.resume();
@@ -51,21 +52,25 @@ public class ScannerFragment extends Fragment {
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
 
-        // Cuando escanea un QR...
+        
+
         barcodeScannerView.decodeContinuous(new BarcodeCallback() {
             @Override
             public void barcodeResult(BarcodeResult result) {
                 if (result.getText() == null || result.getText().isEmpty()) return;
 
-                // Pausamos el escáner para no lanzar 20 peticiones por segundo
+                
+
                 barcodeScannerView.pause();
 
-                // Enviamos el QR a Flask
+                
+
                 mainViewModel.escanearTicket(token, result.getText());
             }
         });
 
-        // Cuando Flask responde, mostramos el Toast y reactivamos la cámara tras 2 segundos
+        
+
         mainViewModel.getMensajes().observe(getViewLifecycleOwner(), msj -> {
             if (msj != null && msj.contains("✅") || msj != null && msj.contains("❌")) {
                 new Handler(Looper.getMainLooper()).postDelayed(() -> barcodeScannerView.resume(), 2500);

@@ -33,7 +33,8 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
     @NonNull
     @Override
     public ButacaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Apuntamos al archivo unificado
+        
+
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_butaca, parent, false);
         return new ButacaViewHolder(view);
     }
@@ -42,7 +43,8 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
     public void onBindViewHolder(@NonNull ButacaViewHolder holder, int position) {
         Butaca butaca = listaButacas.get(position);
 
-        // Si es un pasillo/hueco, ocultar
+        
+
         if (butaca == null) {
             holder.itemView.setVisibility(View.INVISIBLE);
             holder.itemView.setOnClickListener(null);
@@ -52,19 +54,23 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
         holder.itemView.setVisibility(View.VISIBLE);
         holder.tvButaca.setText(butaca.getFila() + "-" + butaca.getNumeroComercial());
 
-        // LÓGICA DE COLORES DIRECTAMENTE EN EL TEXTVIEW
+        
+
         if (butaca.isOcupada()) {
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#9E9E9E")); // GRIS
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#9E9E9E")); 
+
             holder.itemView.setOnClickListener(null);
         } else if (seleccionadas.contains(butaca.getIdButaca())) {
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935")); // ROJO
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#E53935")); 
+
             holder.itemView.setOnClickListener(v -> {
                 seleccionadas.remove(Integer.valueOf(butaca.getIdButaca()));
                 notifyItemChanged(position);
                 listener.onSeleccionCambiada(seleccionadas.size());
             });
         } else {
-            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50")); // VERDE
+            holder.tvButaca.setBackgroundColor(Color.parseColor("#4CAF50")); 
+
             holder.itemView.setOnClickListener(v -> {
                 seleccionadas.add(butaca.getIdButaca());
                 notifyItemChanged(position);
@@ -87,7 +93,8 @@ public class ButacaAdapter extends RecyclerView.Adapter<ButacaAdapter.ButacaView
 
         public ButacaViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Referenciamos el ID del nuevo diseño
+            
+
             tvButaca = itemView.findViewById(R.id.tvButaca);
         }
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class ProfileFragment extends Fragment {
         tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
 
         LinearLayout btnCambiarNombre = view.findViewById(R.id.btnCambiarNombre);
+        LinearLayout btnCambiarPassword = view.findViewById(R.id.btnCambiarPassword);
         LinearLayout btnHistorialReservas = view.findViewById(R.id.btnHistorialReservas);
         LinearLayout btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
         View separadorHistorial = view.findViewById(R.id.separadorHistorial);
@@ -57,7 +59,8 @@ public class ProfileFragment extends Fragment {
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        // OCULTAMOS EL HISTORIAL SI ES ADMINISTRADOR O SUPERADMIN
+        
+
         if ("Admin".equals(rol) || "Superadmin".equals(rol)) {
             btnHistorialReservas.setVisibility(View.GONE);
             if (separadorHistorial != null) {
@@ -68,6 +71,7 @@ public class ProfileFragment extends Fragment {
         cargarPerfil();
 
         btnCambiarNombre.setOnClickListener(v -> mostrarDialogoCambiarNombre());
+        btnCambiarPassword.setOnClickListener(v -> mostrarDialogoCambiarPassword());
 
         btnHistorialReservas.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistorialActivity.class);
@@ -116,6 +120,42 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 
+    private void mostrarDialogoCambiarPassword() {
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 0);
+
+        TextInputLayout tilAntigua = new TextInputLayout(requireContext());
+        TextInputEditText etAntigua = new TextInputEditText(requireContext());
+        etAntigua.setHint("Contrasena actual");
+        etAntigua.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        tilAntigua.addView(etAntigua);
+        layout.addView(tilAntigua);
+
+        TextInputLayout tilNueva = new TextInputLayout(requireContext());
+        TextInputEditText etNueva = new TextInputEditText(requireContext());
+        etNueva.setHint("Nueva contrasena");
+        etNueva.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        tilNueva.addView(etNueva);
+        tilNueva.setPadding(0, 20, 0, 0);
+        layout.addView(tilNueva);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Cambiar Contrasena")
+                .setView(layout)
+                .setPositiveButton("Guardar", (dialog, which) -> {
+                    String actual = etAntigua.getText().toString().trim();
+                    String nueva = etNueva.getText().toString().trim();
+                    if (!actual.isEmpty() && !nueva.isEmpty()) {
+                        actualizarPasswordServidor(actual, nueva);
+                    } else {
+                        Toast.makeText(getContext(), "Rellena ambos campos", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
     private void actualizarNombreServidor(String nuevoNombre) {
         Map<String, String> body = new HashMap<>();
         body.put("nombre", nuevoNombre);
@@ -130,6 +170,27 @@ public class ProfileFragment extends Fragment {
             }
             @Override
             public void onFailure(Call<ReservaResponse> call, Throwable t) {}
+        });
+    }
+
+    private void actualizarPasswordServidor(String actual, String nueva) {
+        Map<String, String> body = new HashMap<>();
+        body.put("password_actual", actual);
+        body.put("password_nueva", nueva);
+
+        apiService.cambiarPassword(token, body).enqueue(new Callback<ReservaResponse>() {
+            @Override
+            public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Contrasena actualizada", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "La contrasena actual es incorrecta", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ReservaResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexion", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
