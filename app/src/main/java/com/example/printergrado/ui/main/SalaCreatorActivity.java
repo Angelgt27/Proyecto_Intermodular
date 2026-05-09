@@ -48,11 +48,13 @@ public class SalaCreatorActivity extends AppCompatActivity {
     private SalaCreatorAdapter adapter;
     private ApiService apiService;
 
-    String[] opcionesFormato = {"Numérica", "Alfabética"};
+    String[] opcionesFormato = {"Numerica", "Alfabetica"};
 
     private boolean modoEdicion = false;
     private int idSalaAEditar = -1;
     private boolean isLoadingData = false;
+
+    private int idCineSuperadmin = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,10 @@ public class SalaCreatorActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.btnVolverCreator).setOnClickListener(v -> finish());
+
+        if (getIntent() != null && getIntent().hasExtra("ID_CINE_SUPERADMIN")) {
+            idCineSuperadmin = getIntent().getIntExtra("ID_CINE_SUPERADMIN", -1);
+        }
 
         etNombreSala = findViewById(R.id.etNombreSalaCreator);
         etFilas = findViewById(R.id.etFilasCreator);
@@ -87,8 +93,8 @@ public class SalaCreatorActivity extends AppCompatActivity {
         spinnerFormatoFilas.setAdapter(adapterFormatos);
         spinnerFormatoColumnas.setAdapter(adapterFormatos);
 
-        spinnerFormatoFilas.setText("Numérica", false);
-        spinnerFormatoColumnas.setText("Numérica", false);
+        spinnerFormatoFilas.setText("Numerica", false);
+        spinnerFormatoColumnas.setText("Numerica", false);
 
         TextWatcher autoDrawWatcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -114,7 +120,6 @@ public class SalaCreatorActivity extends AppCompatActivity {
         }
     }
 
-    // NUEVA FUNCIÓN: Obtiene el tamaño real máximo (Ej: si la última es 'E', sabe que son 5 columnas)
     private int obtenerTamanoReal(String ultimoElemento, boolean esLetra) {
         if (esLetra) {
             return ultimoElemento.charAt(0) - 'A' + 1;
@@ -131,12 +136,11 @@ public class SalaCreatorActivity extends AppCompatActivity {
         apiService.getButacasSalaAdmin(token, idSalaAEditar).enqueue(new Callback<List<Butaca>>() {
             @Override
             public void onResponse(Call<List<Butaca>> call, Response<List<Butaca>> response) {
+                isLoadingData = false;
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Butaca> butacasReales = response.body();
-                    if (butacasReales.isEmpty()) {
-                        isLoadingData = false;
-                        return;
-                    }
+                    if (butacasReales.isEmpty()) return;
 
                     List<String> filas = new ArrayList<>();
                     List<String> columnas = new ArrayList<>();
@@ -145,18 +149,19 @@ public class SalaCreatorActivity extends AppCompatActivity {
                         if (!columnas.contains(b.getColumna())) columnas.add(b.getColumna());
                     }
 
+                    if (filas.isEmpty() || columnas.isEmpty()) return;
+
                     Collections.sort(filas, (s1, s2) -> compararAlfaNumerico(s1, s2));
                     Collections.sort(columnas, (s1, s2) -> compararAlfaNumerico(s1, s2));
 
                     boolean filasLetras = !Character.isDigit(filas.get(0).charAt(0));
                     boolean columnasLetras = !Character.isDigit(columnas.get(0).charAt(0));
 
-                    // REPARACIÓN COLUMNA FANTASMA: Calculamos en base al máximo elemento, no al conteo de únicos
                     int numFilas = obtenerTamanoReal(filas.get(filas.size() - 1), filasLetras);
                     int numColumnas = obtenerTamanoReal(columnas.get(columnas.size() - 1), columnasLetras);
 
-                    spinnerFormatoFilas.setText(filasLetras ? "Alfabética" : "Numérica", false);
-                    spinnerFormatoColumnas.setText(columnasLetras ? "Alfabética" : "Numérica", false);
+                    spinnerFormatoFilas.setText(filasLetras ? "Alfabetica" : "Numerica", false);
+                    spinnerFormatoColumnas.setText(columnasLetras ? "Alfabetica" : "Numerica", false);
 
                     etFilas.setText(String.valueOf(numFilas));
                     etColumnas.setText(String.valueOf(numColumnas));
@@ -186,13 +191,14 @@ public class SalaCreatorActivity extends AppCompatActivity {
                     rvMapa.setVisibility(View.VISIBLE);
                     viewPantallaCreator.setVisibility(View.VISIBLE);
                     btnGuardarSala.setVisibility(View.VISIBLE);
-
-                    isLoadingData = false;
+                } else {
+                    Toast.makeText(SalaCreatorActivity.this, "El servidor rechazo la descarga de butacas", Toast.LENGTH_LONG).show();
                 }
             }
             @Override
             public void onFailure(Call<List<Butaca>> call, Throwable t) {
                 isLoadingData = false;
+                Toast.makeText(SalaCreatorActivity.this, "Error de red al cargar butacas", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -223,8 +229,8 @@ public class SalaCreatorActivity extends AppCompatActivity {
             return;
         }
 
-        boolean filasLetras = spinnerFormatoFilas.getText().toString().equals("Alfabética");
-        boolean columnasLetras = spinnerFormatoColumnas.getText().toString().equals("Alfabética");
+        boolean filasLetras = spinnerFormatoFilas.getText().toString().equals("Alfabetica");
+        boolean columnasLetras = spinnerFormatoColumnas.getText().toString().equals("Alfabetica");
 
         List<ButacaTemporal> matriz = new ArrayList<>();
 
@@ -256,7 +262,7 @@ public class SalaCreatorActivity extends AppCompatActivity {
     private void guardarSalaEnServidor() {
         String nombreSala = etNombreSala.getText().toString().trim();
         if (nombreSala.isEmpty() || adapter == null) {
-            Toast.makeText(this, "Ponle un nombre a la sala", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ponle un nombre a la sala y dibuja el mapa", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -287,6 +293,10 @@ public class SalaCreatorActivity extends AppCompatActivity {
         payload.put("capacidad", finalCapacidadReal);
         payload.put("butacas", butacasFinales);
 
+        if (idCineSuperadmin != -1) {
+            payload.put("fk_cine", idCineSuperadmin);
+        }
+
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String token = "Bearer " + prefs.getString("jwt_token", "");
 
@@ -300,11 +310,11 @@ public class SalaCreatorActivity extends AppCompatActivity {
                     if (response.body() != null && response.body().getMensaje() != null) {
                         Toast.makeText(SalaCreatorActivity.this, response.body().getMensaje(), Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(SalaCreatorActivity.this, "¡Sala guardada con éxito!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SalaCreatorActivity.this, "¡Sala guardada con exito!", Toast.LENGTH_SHORT).show();
                     }
                     finish();
                 } else {
-                    Toast.makeText(SalaCreatorActivity.this, "Error al guardar", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SalaCreatorActivity.this, "Permiso denegado al guardar", Toast.LENGTH_LONG).show();
                     btnGuardarSala.setEnabled(true);
                     btnGuardarSala.setText("Guardar Sala Definitiva");
                 }

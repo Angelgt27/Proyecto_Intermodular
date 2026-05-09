@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@color/blanco"
+    android:elevation="2dp"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvNombreCineItem"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Nombre del Cine"
+        android:textColor="@color/negro"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvDireccionCineItem"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Dirección del cine..."
+        android:textColor="@color/gris_oscuro"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvNombreCineItem" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="end"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tvDireccionCineItem">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDetallesCine"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Detalles"
+            android:textColor="@color/negro" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEliminarCine"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Eliminar"
+            android:textColor="@color/rojo_cine" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

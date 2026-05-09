@@ -1,11 +1,13 @@
 package com.example.printergrado.data.api;
 
 import com.example.printergrado.data.model.AuthResponse;
+import com.example.printergrado.data.model.Cine;
 import com.example.printergrado.data.model.LoginRequest;
 import com.example.printergrado.data.model.RegistroRequest;
 import com.example.printergrado.data.model.Pelicula;
 import com.example.printergrado.data.model.ReservaRequest;
 import com.example.printergrado.data.model.ReservaResponse;
+import com.example.printergrado.data.model.Sala;
 import com.example.printergrado.data.model.Ticket;
 import com.example.printergrado.data.model.Butaca;
 
@@ -20,6 +22,7 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -104,4 +107,16 @@ public interface ApiService {
     Call<List<Butaca>> getButacasSalaAdmin(@Header("Authorization") String token, @Path("id_sala") int idSala);
     @GET("api/cines")
     Call<List<Map<String, Object>>> getTodosLosCines();
+    @GET("api/superadmin/cines")
+    Call<List<Cine>> getCinesSuperadmin(@Header("Authorization") String token);
+
+    @POST("api/superadmin/cines")
+    Call<ReservaResponse> crearCineSuperadmin(@Header("Authorization") String token, @Body Map<String, Object> body);
+
+    @DELETE("api/superadmin/cines/{id_cine}")
+    Call<ReservaResponse> eliminarCineSuperadmin(@Header("Authorization") String token, @Path("id_cine") int idCine);
+    @GET("api/salas")
+    Call<List<Sala>> getSalas(@Header("Authorization") String token, @Query("cine_id") Integer cineId);
+    @PUT("api/superadmin/cines/{id_cine}")
+    Call<ReservaResponse> actualizarCineSuperadmin(@Header("Authorization") String token, @Path("id_cine") int idCine, @Body Map<String, String> body);
 }

@@ -34,6 +34,8 @@ public class AdminSalasListaActivity extends AppCompatActivity {
     private ApiService apiService;
     private String token;
 
+    private int idCineSuperadmin = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,8 +52,15 @@ public class AdminSalasListaActivity extends AppCompatActivity {
 
         findViewById(R.id.btnVolverSalasList).setOnClickListener(v -> finish());
 
+        // Obtenemos el ID si lo ha pasado el Superadmin
+        if (getIntent() != null && getIntent().hasExtra("ID_CINE")) {
+            idCineSuperadmin = getIntent().getIntExtra("ID_CINE", -1);
+        }
+
         findViewById(R.id.fabAgregarSalaList).setOnClickListener(v -> {
-            startActivity(new Intent(this, SalaCreatorActivity.class));
+            Intent intent = new Intent(this, SalaCreatorActivity.class);
+            if (idCineSuperadmin != -1) intent.putExtra("ID_CINE_SUPERADMIN", idCineSuperadmin);
+            startActivity(intent);
         });
 
         apiService = ApiClient.getClient().create(ApiService.class);
@@ -67,6 +76,7 @@ public class AdminSalasListaActivity extends AppCompatActivity {
                 Intent intent = new Intent(AdminSalasListaActivity.this, SalaCreatorActivity.class);
                 intent.putExtra("ID_SALA", sala.getIdSala());
                 intent.putExtra("NOMBRE_SALA", sala.getNombre());
+                if (idCineSuperadmin != -1) intent.putExtra("ID_CINE_SUPERADMIN", idCineSuperadmin);
                 startActivity(intent);
             }
 
@@ -85,7 +95,8 @@ public class AdminSalasListaActivity extends AppCompatActivity {
     }
 
     private void cargarSalas() {
-        apiService.getSalas(token).enqueue(new Callback<List<Sala>>() {
+        // Usamos idCineSuperadmin si no es -1, o null si es admin normal
+        apiService.getSalas(token, idCineSuperadmin != -1 ? idCineSuperadmin : null).enqueue(new Callback<List<Sala>>() {
             @Override
             public void onResponse(Call<List<Sala>> call, Response<List<Sala>> response) {
                 if (response.isSuccessful() && response.body() != null) {

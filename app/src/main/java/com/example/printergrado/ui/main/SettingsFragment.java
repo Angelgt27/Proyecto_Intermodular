@@ -51,23 +51,20 @@ public class SettingsFragment extends Fragment {
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        // Si es cualquiera de los dos admins, mostramos el botón
         if (isAdmin || isSuperAdmin) {
             btnGestionCine.setVisibility(View.VISIBLE);
             separadorGestion.setVisibility(View.VISIBLE);
 
-            // Si es Superadmin, cambiamos el texto visualmente buscando el TextView dentro del botón
             if (isSuperAdmin) {
-                for (int i = 0; i < btnGestionCine.getChildCount(); i++) {
-                    View child = btnGestionCine.getChildAt(i);
-                    if (child instanceof TextView) {
-                        ((TextView) child).setText("Ajustes de SuperAdministrador");
+                if (btnGestionCine.getChildCount() > 0) {
+                    View firstChild = btnGestionCine.getChildAt(0);
+                    if (firstChild instanceof TextView) {
+                        ((TextView) firstChild).setText("Ajustes de Superadministrador");
                     }
                 }
             }
 
             btnGestionCine.setOnClickListener(v -> {
-                // Por ahora abre el panel de Admin, en la Fase 3 lo adaptaremos
                 Intent intent = new Intent(requireContext(), AdminDashboardActivity.class);
                 startActivity(intent);
             });

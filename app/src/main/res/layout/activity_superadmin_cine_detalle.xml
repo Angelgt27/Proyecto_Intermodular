@@ -7,7 +7,7 @@
     android:background="#F8F8F8">
 
     <LinearLayout
-        android:id="@+id/barraSuperiorDashboard"
+        android:id="@+id/barraSuperiorDetalleCine"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@color/rojo_cine"
@@ -15,7 +15,7 @@
         android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/btnVolverDashboard"
+            android:id="@+id/btnVolverDetalleCine"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -27,10 +27,10 @@
             android:background="?attr/selectableItemBackground"/>
 
         <TextView
-            android:id="@+id/tvTituloDashboard"
+            android:id="@+id/tvTituloDetalleCine"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Panel de Control"
+            android:text="Detalles del Cine"
             android:textColor="@color/blanco"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -48,75 +48,7 @@
             android:orientation="vertical">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardGestionCines"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@color/blanco"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gestión de Cines"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
-                        android:textColor="@color/negro"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Añadir, eliminar y configurar los diferentes cines."
-                        android:textColor="@color/gris_oscuro"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardGestionAdmins"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@color/blanco"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gestión de Administradores"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
-                        android:textColor="@color/negro"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Crear cuentas de administrador y asignarlas a los cines."
-                        android:textColor="@color/gris_oscuro"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardDatosCine"
+                android:id="@+id/cardDatosCinePuente"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -124,14 +56,12 @@
                 app:cardElevation="2dp"
                 android:clickable="true"
                 android:focusable="true">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@color/blanco"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -143,13 +73,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Nombre comercial, dirección y teléfono."
+                        android:text="Editar nombre, direccion y telefono de este cine."
                         android:textColor="@color/gris_oscuro"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardGestionSalas"
+                android:id="@+id/cardGestionSalasPuente"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -157,14 +87,12 @@
                 app:cardElevation="2dp"
                 android:clickable="true"
                 android:focusable="true">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@color/blanco"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -176,11 +104,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Añadir salas, cerrar salas y dibujar mapa de asientos."
+                        android:text="Gestionar las salas especificas de este cine."
                         android:textColor="@color/gris_oscuro"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

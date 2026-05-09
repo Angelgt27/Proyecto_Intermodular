@@ -33,6 +33,9 @@ public class AdminDatosCineActivity extends AppCompatActivity {
     private ApiService apiService;
     private String token;
 
+    // Si vale -1 es un Admin normal, si tiene otro valor es Superadmin editando ese cine
+    private int idCineSuperadmin = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +61,17 @@ public class AdminDatosCineActivity extends AppCompatActivity {
         token = "Bearer " + prefs.getString("jwt_token", "");
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        cargarDatosActuales();
+        // LOGICA DE PUENTE: Si recibimos ID, rellenamos los datos directamente
+        if (getIntent() != null && getIntent().hasExtra("ID_CINE")) {
+            idCineSuperadmin = getIntent().getIntExtra("ID_CINE", -1);
+            etNombre.setText(getIntent().getStringExtra("NOMBRE"));
+            String dir = getIntent().getStringExtra("DIRECCION");
+            etDireccion.setText((dir == null || dir.isEmpty()) ? "" : dir);
+            String tel = getIntent().getStringExtra("TELEFONO");
+            etTelefono.setText((tel == null || tel.isEmpty()) ? "" : tel);
+        } else {
+            cargarDatosActuales();
+        }
 
         btnGuardar.setOnClickListener(v -> guardarDatos());
     }
@@ -81,7 +94,7 @@ public class AdminDatosCineActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(AdminDatosCineActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AdminDatosCineActivity.this, "Error de conexion", Toast.LENGTH_SHORT).show();
                 btnGuardar.setEnabled(true);
             }
         });
@@ -105,12 +118,12 @@ public class AdminDatosCineActivity extends AppCompatActivity {
         payload.put("direccion", direccion);
         payload.put("telefono", telefono);
 
-        apiService.updateDatosCine(token, payload).enqueue(new Callback<ReservaResponse>() {
+        Callback<ReservaResponse> callback = new Callback<ReservaResponse>() {
             @Override
             public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(AdminDatosCineActivity.this, "Datos guardados correctamente", Toast.LENGTH_SHORT).show();
-                    finish(); // Cierra la pantalla y vuelve al menú
+                    finish();
                 } else {
                     Toast.makeText(AdminDatosCineActivity.this, "Error al guardar", Toast.LENGTH_SHORT).show();
                     btnGuardar.setEnabled(true);
@@ -124,6 +137,13 @@ public class AdminDatosCineActivity extends AppCompatActivity {
                 btnGuardar.setEnabled(true);
                 btnGuardar.setText("Guardar Cambios");
             }
-        });
+        };
+
+        // Si es Superadmin, llama a la ruta especifica; si no, a la de Admin normal
+        if (idCineSuperadmin != -1) {
+            apiService.actualizarCineSuperadmin(token, idCineSuperadmin, payload).enqueue(callback);
+        } else {
+            apiService.updateDatosCine(token, payload).enqueue(callback);
+        }
     }
 }

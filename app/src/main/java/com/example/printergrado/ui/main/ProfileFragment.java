@@ -49,37 +49,31 @@ public class ProfileFragment extends Fragment {
         LinearLayout btnCambiarNombre = view.findViewById(R.id.btnCambiarNombre);
         LinearLayout btnHistorialReservas = view.findViewById(R.id.btnHistorialReservas);
         LinearLayout btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
-        View separadorHistorial = view.findViewById(R.id.separadorHistorial); // Obtenemos la línea
+        View separadorHistorial = view.findViewById(R.id.separadorHistorial);
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
-
-        // RECUPERAMOS EL ROL PARA SABER SI ES ADMIN
         String rol = prefs.getString("rol", "Usuario");
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        // OCULTAMOS EL HISTORIAL SI ES ADMINISTRADOR
-        if ("Admin".equals(rol)) {
+        // OCULTAMOS EL HISTORIAL SI ES ADMINISTRADOR O SUPERADMIN
+        if ("Admin".equals(rol) || "Superadmin".equals(rol)) {
             btnHistorialReservas.setVisibility(View.GONE);
             if (separadorHistorial != null) {
                 separadorHistorial.setVisibility(View.GONE);
             }
         }
 
-        // 1. CARGAR DATOS AL ABRIR LA PESTAÑA
         cargarPerfil();
 
-        // 2. CAMBIAR NOMBRE (Ventana emergente con estilo)
         btnCambiarNombre.setOnClickListener(v -> mostrarDialogoCambiarNombre());
 
-        // 3. HISTORIAL DE RESERVAS
         btnHistorialReservas.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistorialActivity.class);
             startActivity(intent);
         });
 
-        // 4. CERRAR SESIÓN
         btnCerrarSesion.setOnClickListener(v -> cerrarSesion());
 
         return view;
@@ -102,7 +96,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void mostrarDialogoCambiarNombre() {
-        // Creamos un campo de texto con el estilo de la app
         TextInputLayout layout = new TextInputLayout(requireContext());
         layout.setPadding(50, 20, 50, 0);
         TextInputEditText input = new TextInputEditText(requireContext());

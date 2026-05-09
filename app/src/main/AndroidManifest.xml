@@ -50,6 +50,12 @@
             android:name=".ui.main.AdminDatosCineActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.main.SuperadminCinesListaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.main.SuperadminCineDetalleActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
