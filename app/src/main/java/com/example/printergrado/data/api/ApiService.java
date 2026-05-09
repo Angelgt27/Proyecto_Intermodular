@@ -10,6 +10,7 @@ import com.example.printergrado.data.model.ReservaResponse;
 import com.example.printergrado.data.model.Sala;
 import com.example.printergrado.data.model.Ticket;
 import com.example.printergrado.data.model.Butaca;
+import com.example.printergrado.data.model.Usuario;
 
 import java.util.List;
 import java.util.Map;
@@ -119,4 +120,15 @@ public interface ApiService {
     Call<List<Sala>> getSalas(@Header("Authorization") String token, @Query("cine_id") Integer cineId);
     @PUT("api/superadmin/cines/{id_cine}")
     Call<ReservaResponse> actualizarCineSuperadmin(@Header("Authorization") String token, @Path("id_cine") int idCine, @Body Map<String, String> body);
+    @GET("api/superadmin/admins")
+    Call<List<Usuario>> getAdminsSuperadmin(@Header("Authorization") String token);
+
+    @POST("api/superadmin/admins")
+    Call<ReservaResponse> crearAdminSuperadmin(@Header("Authorization") String token, @Body Map<String, Object> body);
+
+    @PUT("api/superadmin/admins/{id_admin}")
+    Call<ReservaResponse> editarAdminSuperadmin(@Header("Authorization") String token, @Path("id_admin") int idAdmin, @Body Map<String, Object> body);
+
+    @DELETE("api/superadmin/admins/{id_admin}")
+    Call<ReservaResponse> eliminarAdminSuperadmin(@Header("Authorization") String token, @Path("id_admin") int idAdmin);
 }

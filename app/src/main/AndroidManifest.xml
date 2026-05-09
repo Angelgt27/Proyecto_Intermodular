@@ -56,6 +56,12 @@
             android:name=".ui.main.SuperadminCineDetalleActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.main.SuperadminAdminsListaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.main.SuperadminAdminFormActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>

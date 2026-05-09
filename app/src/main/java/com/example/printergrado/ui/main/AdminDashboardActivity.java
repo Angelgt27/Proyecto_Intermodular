@@ -47,11 +47,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
         if (isSuperAdmin) {
             tvTitulo.setText("Panel Superadmin");
 
-            // Ocultamos las del Admin normal
             cardDatos.setVisibility(View.GONE);
             cardSalas.setVisibility(View.GONE);
 
-            // Mostramos las exclusivas
             cardCines.setVisibility(View.VISIBLE);
             cardAdmins.setVisibility(View.VISIBLE);
 
@@ -60,11 +58,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
             });
 
             cardAdmins.setOnClickListener(v -> {
-                // startActivity(new Intent(this, SuperadminAdminsListaActivity.class));
+                startActivity(new Intent(this, SuperadminAdminsListaActivity.class));
             });
 
         } else {
-            // Es un Admin normal
+
             tvTitulo.setText("Panel de Control");
             cardCines.setVisibility(View.GONE);
             cardAdmins.setVisibility(View.GONE);
