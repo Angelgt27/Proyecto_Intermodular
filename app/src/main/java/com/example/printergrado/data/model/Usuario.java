@@ -11,6 +11,9 @@ public class Usuario {
     private String email;
     private String rol;
 
+    
+    private Double saldo;
+
     @SerializedName("fk_cine_gestionado")
     private Integer fkCineGestionado;
 
@@ -21,6 +24,7 @@ public class Usuario {
     public String getNombre() { return nombre; }
     public String getEmail() { return email; }
     public String getRol() { return rol; }
+    public Double getSaldo() { return saldo; } 
     public Integer getFkCineGestionado() { return fkCineGestionado; }
     public String getNombreCine() { return nombreCine; }
 }

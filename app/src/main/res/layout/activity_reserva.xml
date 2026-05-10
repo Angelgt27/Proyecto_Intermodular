@@ -150,7 +150,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="3. Selecciona una Hora"
+                android:hint="3. Selecciona una Sesión"
                 android:visibility="gone"
                 app:boxStrokeColor="@color/rojo_cine">
                 <AutoCompleteTextView

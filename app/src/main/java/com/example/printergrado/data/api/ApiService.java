@@ -34,7 +34,7 @@ public interface ApiService {
     Call<AuthResponse> loginUsuario(@Body LoginRequest request);
 
     @GET("api/peliculas")
-    Call<List<Pelicula>> getPeliculas(@retrofit2.http.Query("admin") boolean isAdmin, @retrofit2.http.Query("fecha") String fecha);
+    Call<List<Pelicula>> getPeliculas(@Query("admin") boolean isAdmin, @Query("fecha") String fecha);
 
     @POST("api/reservas")
     Call<ReservaResponse> crearReservaConButacas(@Header("Authorization") String token, @Body Map<String, Object> request);
@@ -48,44 +48,61 @@ public interface ApiService {
     @POST("api/escanear/{qr_code}")
     Call<ReservaResponse> escanearTicket(@Header("Authorization") String token, @Path("qr_code") String qrCode);
 
+    
+
     @GET("api/usuario/perfil")
-    Call<com.example.printergrado.data.model.Usuario> obtenerPerfil(@Header("Authorization") String token);
+    Call<Usuario> obtenerPerfil(@Header("Authorization") String token);
 
     @PUT("api/usuario/nombre")
-    Call<com.example.printergrado.data.model.ReservaResponse> cambiarNombre(@Header("Authorization") String token, @Body java.util.Map<String, String> body);
+    Call<ReservaResponse> cambiarNombre(@Header("Authorization") String token, @Body Map<String, String> body);
+
+    
+    @PUT("api/usuario/password")
+    Call<ReservaResponse> cambiarPassword(@Header("Authorization") String token, @Body Map<String, String> body);
+
+    @POST("api/usuario/recargar")
+    Call<ReservaResponse> recargarSaldo(@Header("Authorization") String token, @Body Map<String, Object> body);
 
     @DELETE("api/usuario")
-    Call<com.example.printergrado.data.model.ReservaResponse> eliminarCuenta(@Header("Authorization") String token);
+    Call<ReservaResponse> eliminarCuenta(@Header("Authorization") String token);
 
     @GET("api/usuario/historial")
-    Call<List<com.example.printergrado.data.model.Ticket>> obtenerHistorial(@Header("Authorization") String token);
+    Call<List<Ticket>> obtenerHistorial(@Header("Authorization") String token);
+
+    
 
     @GET("api/sesiones/{id_sesion}/butacas")
     Call<List<Butaca>> getMapaButacas(@Header("Authorization") String token, @Path("id_sesion") int idSesion);
 
     @POST("api/peliculas")
-    Call<ReservaResponse> crearPelicula(@Header("Authorization") String token, @Body java.util.Map<String, Object> body);
+    Call<ReservaResponse> crearPelicula(@Header("Authorization") String token, @Body Map<String, Object> body);
 
     @PUT("api/peliculas/{id}")
-    Call<ReservaResponse> actualizarPelicula(@Header("Authorization") String token, @Path("id") int idPelicula, @Body java.util.Map<String, Object> body);
+    Call<ReservaResponse> actualizarPelicula(@Header("Authorization") String token, @Path("id") int idPelicula, @Body Map<String, Object> body);
 
     @DELETE("api/peliculas/{id}")
     Call<ReservaResponse> eliminarPelicula(@Header("Authorization") String token, @Path("id") int idPelicula);
 
     @GET("api/peliculas/{id}/sesiones")
-    Call<java.util.List<com.example.printergrado.data.model.Sesion>> getSesionesPelicula(@Path("id") int idPelicula, @retrofit2.http.Query("admin") boolean isAdmin);
+    Call<List<com.example.printergrado.data.model.Sesion>> getSesionesPelicula(@Path("id") int idPelicula, @Query("admin") boolean isAdmin);
 
     @POST("api/peliculas/{id}/sesiones")
-    Call<ReservaResponse> crearSesion(@Header("Authorization") String token, @Path("id") int idPelicula, @Body java.util.Map<String, Object> body);
+    Call<ReservaResponse> crearSesion(@Header("Authorization") String token, @Path("id") int idPelicula, @Body Map<String, Object> body);
 
     @PUT("api/sesiones/{id}")
-    Call<ReservaResponse> actualizarSesion(@Header("Authorization") String token, @Path("id") int idSesion, @Body java.util.Map<String, Object> body);
+    Call<ReservaResponse> actualizarSesion(@Header("Authorization") String token, @Path("id") int idSesion, @Body Map<String, Object> body);
 
     @DELETE("api/sesiones/{id}")
     Call<ReservaResponse> eliminarSesion(@Header("Authorization") String token, @Path("id") int idSesion);
 
+    
+
     @GET("api/salas")
-    Call<List<com.example.printergrado.data.model.Sala>> getSalas(@Header("Authorization") String token);
+    Call<List<Sala>> getSalas(@Header("Authorization") String token);
+
+    @GET("api/salas")
+    Call<List<Sala>> getSalas(@Header("Authorization") String token, @Query("cine_id") Integer cineId);
+
     @GET("api/admin/cine")
     Call<Map<String, Object>> getDatosCine(@Header("Authorization") String token);
 
@@ -106,8 +123,12 @@ public interface ApiService {
 
     @GET("api/admin/salas/{id_sala}/butacas")
     Call<List<Butaca>> getButacasSalaAdmin(@Header("Authorization") String token, @Path("id_sala") int idSala);
+
     @GET("api/cines")
     Call<List<Map<String, Object>>> getTodosLosCines();
+
+    
+
     @GET("api/superadmin/cines")
     Call<List<Cine>> getCinesSuperadmin(@Header("Authorization") String token);
 
@@ -116,10 +137,10 @@ public interface ApiService {
 
     @DELETE("api/superadmin/cines/{id_cine}")
     Call<ReservaResponse> eliminarCineSuperadmin(@Header("Authorization") String token, @Path("id_cine") int idCine);
-    @GET("api/salas")
-    Call<List<Sala>> getSalas(@Header("Authorization") String token, @Query("cine_id") Integer cineId);
+
     @PUT("api/superadmin/cines/{id_cine}")
     Call<ReservaResponse> actualizarCineSuperadmin(@Header("Authorization") String token, @Path("id_cine") int idCine, @Body Map<String, String> body);
+
     @GET("api/superadmin/admins")
     Call<List<Usuario>> getAdminsSuperadmin(@Header("Authorization") String token);
 
@@ -131,6 +152,4 @@ public interface ApiService {
 
     @DELETE("api/superadmin/admins/{id_admin}")
     Call<ReservaResponse> eliminarAdminSuperadmin(@Header("Authorization") String token, @Path("id_admin") int idAdmin);
-    @PUT("api/usuario/password")
-    Call<ReservaResponse> cambiarPassword(@Header("Authorization") String token, @Body Map<String, String> body);
 }

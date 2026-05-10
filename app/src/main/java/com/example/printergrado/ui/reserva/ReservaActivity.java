@@ -52,6 +52,7 @@ public class ReservaActivity extends AppCompatActivity {
     private List<Sesion> todasLasSesiones = new ArrayList<>();
     private int idPelicula = 1;
     private int idSesionFinal = -1;
+    private double precioSesionActual = 0.0; 
     private ButacaAdapter butacaAdapter;
     private ReservaViewModel reservaViewModel;
 
@@ -111,11 +112,19 @@ public class ReservaActivity extends AppCompatActivity {
         }
 
         reservaViewModel = new ViewModelProvider(this).get(ReservaViewModel.class);
+
+        
         reservaViewModel.getMensajeReserva().observe(this, mensaje -> {
             if (mensaje != null) {
                 Toast.makeText(ReservaActivity.this, mensaje, Toast.LENGTH_LONG).show();
                 btnComprar.setEnabled(true);
-                btnComprar.setText("Confirmar Reserva");
+                
+                if (butacaAdapter != null) {
+                    int cant = butacaAdapter.getButacasSeleccionadas().size();
+                    btnComprar.setText(String.format("Comprar %d entradas (%.2f €)", cant, cant * precioSesionActual));
+                } else {
+                    btnComprar.setText("Confirmar Reserva");
+                }
             }
         });
         reservaViewModel.getReservaExitosa().observe(this, exitosa -> {
@@ -139,26 +148,20 @@ public class ReservaActivity extends AppCompatActivity {
                     spinnerCine.setEnabled(false);
                 }
             }
-            @Override public void onFailure(Call<List<Sesion>> call, Throwable t) {
-                Toast.makeText(ReservaActivity.this, "Error conectando con el servidor", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(Call<List<Sesion>> call, Throwable t) {}
         });
     }
 
     private void configurarSelectorCine() {
         Set<String> cines = new HashSet<>();
         for (Sesion s : todasLasSesiones) cines.add(s.getCine());
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>(cines));
-        spinnerCine.setAdapter(adapter);
-
+        spinnerCine.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>(cines)));
         spinnerCine.setOnItemClickListener((parent, view, position, id) -> {
             String cineSel = (String) parent.getItemAtPosition(position);
             spinnerFecha.setText("", false);
             spinnerHora.setText("", false);
             layoutHora.setVisibility(View.GONE);
             ocultarMapa();
-
             filtrarFechas(cineSel);
             layoutFecha.setVisibility(View.VISIBLE);
         });
@@ -170,11 +173,9 @@ public class ReservaActivity extends AppCompatActivity {
             if (s.getCine().equals(cine)) fechas.add(s.getFecha());
         }
         spinnerFecha.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>(fechas)));
-
         spinnerFecha.setOnItemClickListener((parent, view, position, id) -> {
             spinnerHora.setText("", false);
             ocultarMapa();
-
             filtrarHoras(cine, (String) parent.getItemAtPosition(position));
             layoutHora.setVisibility(View.VISIBLE);
         });
@@ -186,13 +187,14 @@ public class ReservaActivity extends AppCompatActivity {
         for (Sesion s : todasLasSesiones) {
             if (s.getCine().equals(cine) && s.getFecha().equals(fecha)) {
                 sesionesFinales.add(s);
-                horas.add(s.getHora());
+                horas.add(s.getHora() + " - " + s.getPrecio() + "€"); 
             }
         }
         spinnerHora.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, horas));
 
         spinnerHora.setOnItemClickListener((parent, view, position, id) -> {
             idSesionFinal = sesionesFinales.get(position).getIdSesion();
+            precioSesionActual = sesionesFinales.get(position).getPrecio(); 
             cargarMapaButacas(idSesionFinal);
         });
     }
@@ -205,22 +207,14 @@ public class ReservaActivity extends AppCompatActivity {
         btnComprar.setText("Selecciona al menos una butaca");
     }
 
-    
-
     private int compararAlfaNumerico(String s1, String s2) {
-        try {
-            return Integer.compare(Integer.parseInt(s1), Integer.parseInt(s2));
-        } catch (NumberFormatException e) {
-            return s1.compareTo(s2);
-        }
+        try { return Integer.compare(Integer.parseInt(s1), Integer.parseInt(s2)); }
+        catch (NumberFormatException e) { return s1.compareTo(s2); }
     }
 
     private int obtenerTamanoReal(String ultimoElemento, boolean esLetra) {
-        if (esLetra) {
-            return ultimoElemento.charAt(0) - 'A' + 1;
-        } else {
-            return Integer.parseInt(ultimoElemento);
-        }
+        if (esLetra) return ultimoElemento.charAt(0) - 'A' + 1;
+        else return Integer.parseInt(ultimoElemento);
     }
 
     private void cargarMapaButacas(int idSesion) {
@@ -233,11 +227,7 @@ public class ReservaActivity extends AppCompatActivity {
             public void onResponse(Call<List<Butaca>> call, Response<List<Butaca>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Butaca> listaButacasReales = response.body();
-
-                    if (listaButacasReales.isEmpty()) {
-                        Toast.makeText(ReservaActivity.this, "Esta sala no tiene butacas configuradas", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    if (listaButacasReales.isEmpty()) return;
 
                     tvInstruccionButacas.setVisibility(View.VISIBLE);
                     viewPantalla.setVisibility(View.VISIBLE);
@@ -256,8 +246,6 @@ public class ReservaActivity extends AppCompatActivity {
                     boolean filasLetras = !Character.isDigit(filas.get(0).charAt(0));
                     boolean columnasLetras = !Character.isDigit(columnas.get(0).charAt(0));
 
-                    
-
                     int numFilas = obtenerTamanoReal(filas.get(filas.size() - 1), filasLetras);
                     int numColumnasGrid = obtenerTamanoReal(columnas.get(columnas.size() - 1), columnasLetras);
 
@@ -268,12 +256,10 @@ public class ReservaActivity extends AppCompatActivity {
                         String f = filasLetras ? String.valueOf((char)('A' + i)) : String.valueOf(i + 1);
                         for (int j = 0; j < numColumnasGrid; j++) {
                             String c = columnasLetras ? String.valueOf((char)('A' + j)) : String.valueOf(j + 1);
-
                             Butaca butacaEncontrada = null;
                             for (Butaca b : listaButacasReales) {
                                 if (b.getFila().equals(f) && b.getColumna().equals(c)) {
-                                    butacaEncontrada = b;
-                                    break;
+                                    butacaEncontrada = b; break;
                                 }
                             }
                             cuadriculaCompleta.add(butacaEncontrada);
@@ -284,7 +270,8 @@ public class ReservaActivity extends AppCompatActivity {
                         if (cantidad > 0) {
                             btnComprar.setEnabled(true);
                             btnComprar.setBackgroundColor(getResources().getColor(R.color.rojo_cine));
-                            btnComprar.setText("Comprar " + cantidad + " entradas");
+                            
+                            btnComprar.setText(String.format("Comprar %d entradas (%.2f €)", cantidad, cantidad * precioSesionActual));
                         } else {
                             btnComprar.setEnabled(false);
                             btnComprar.setBackgroundColor(getResources().getColor(R.color.gris_oscuro));
@@ -295,15 +282,12 @@ public class ReservaActivity extends AppCompatActivity {
                     rvButacas.setAdapter(butacaAdapter);
                 }
             }
-            @Override public void onFailure(Call<List<Butaca>> call, Throwable t) {
-                Toast.makeText(ReservaActivity.this, "Error cargando butacas", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(Call<List<Butaca>> call, Throwable t) {}
         });
     }
 
     private void realizarCompra() {
         if (idSesionFinal == -1 || butacaAdapter == null) return;
-
         List<Integer> butacasElegidas = butacaAdapter.getButacasSeleccionadas();
         if (butacasElegidas.isEmpty()) return;
 
@@ -312,7 +296,7 @@ public class ReservaActivity extends AppCompatActivity {
 
         if (token != null) {
             btnComprar.setEnabled(false);
-            btnComprar.setText("Procesando...");
+            btnComprar.setText("Procesando pago...");
             reservaViewModel.hacerReservaConButacas("Bearer " + token, idSesionFinal, butacasElegidas);
         }
     }

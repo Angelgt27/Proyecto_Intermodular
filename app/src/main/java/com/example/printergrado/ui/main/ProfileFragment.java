@@ -35,7 +35,8 @@ import retrofit2.Response;
 
 public class ProfileFragment extends Fragment {
 
-    private TextView tvProfileName, tvProfileEmail;
+    private TextView tvProfileName, tvProfileEmail, tvSaldo;
+    private View layoutCartera;
     private String token;
     private ApiService apiService;
 
@@ -46,12 +47,15 @@ public class ProfileFragment extends Fragment {
 
         tvProfileName = view.findViewById(R.id.tvProfileName);
         tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
+        tvSaldo = view.findViewById(R.id.tvSaldo);
+        layoutCartera = view.findViewById(R.id.layoutCartera);
 
         LinearLayout btnCambiarNombre = view.findViewById(R.id.btnCambiarNombre);
         LinearLayout btnCambiarPassword = view.findViewById(R.id.btnCambiarPassword);
         LinearLayout btnHistorialReservas = view.findViewById(R.id.btnHistorialReservas);
         LinearLayout btnCerrarSesion = view.findViewById(R.id.btnCerrarSesion);
         View separadorHistorial = view.findViewById(R.id.separadorHistorial);
+        View btnRecargar = view.findViewById(R.id.btnRecargar);
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         token = "Bearer " + prefs.getString("jwt_token", "");
@@ -59,10 +63,9 @@ public class ProfileFragment extends Fragment {
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        
-
         if ("Admin".equals(rol) || "Superadmin".equals(rol)) {
             btnHistorialReservas.setVisibility(View.GONE);
+            layoutCartera.setVisibility(View.GONE);
             if (separadorHistorial != null) {
                 separadorHistorial.setVisibility(View.GONE);
             }
@@ -72,6 +75,7 @@ public class ProfileFragment extends Fragment {
 
         btnCambiarNombre.setOnClickListener(v -> mostrarDialogoCambiarNombre());
         btnCambiarPassword.setOnClickListener(v -> mostrarDialogoCambiarPassword());
+        btnRecargar.setOnClickListener(v -> mostrarDialogoRecargar());
 
         btnHistorialReservas.setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), HistorialActivity.class);
@@ -88,13 +92,66 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onResponse(Call<Usuario> call, Response<Usuario> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    tvProfileName.setText("Hola, " + response.body().getNombre());
-                    tvProfileEmail.setText(response.body().getEmail());
+                    Usuario u = response.body();
+                    tvProfileName.setText("Hola, " + u.getNombre());
+                    tvProfileEmail.setText(u.getEmail());
+
+                    if (u.getSaldo() != null && tvSaldo != null) {
+                        tvSaldo.setText(String.format("%.2f €", u.getSaldo()));
+                    }
                 }
             }
             @Override
             public void onFailure(Call<Usuario> call, Throwable t) {
                 tvProfileName.setText("Error al cargar perfil");
+            }
+        });
+    }
+
+    private void mostrarDialogoRecargar() {
+        TextInputLayout layout = new TextInputLayout(requireContext());
+        layout.setPadding(50, 20, 50, 0);
+        TextInputEditText input = new TextInputEditText(requireContext());
+        input.setHint("Cantidad en euros");
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(input);
+
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Recargar Cartera")
+                .setMessage("Introduce el dinero a recargar:")
+                .setView(layout)
+                .setPositiveButton("Recargar", (dialog, which) -> {
+                    String strCantidad = input.getText().toString().trim();
+                    if (!strCantidad.isEmpty()) {
+                        try {
+                            double cantidad = Double.parseDouble(strCantidad);
+                            recargarServidor(cantidad);
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "Numero no valido", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void recargarServidor(double cantidad) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("cantidad", cantidad);
+
+        apiService.recargarSaldo(token, body).enqueue(new Callback<ReservaResponse>() {
+            @Override
+            public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Recarga exitosa", Toast.LENGTH_SHORT).show();
+                    cargarPerfil();
+                } else {
+                    Toast.makeText(getContext(), "Error al recargar", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ReservaResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
     }
