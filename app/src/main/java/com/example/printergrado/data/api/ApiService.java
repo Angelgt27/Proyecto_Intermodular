@@ -34,7 +34,7 @@ public interface ApiService {
     Call<AuthResponse> loginUsuario(@Body LoginRequest request);
 
     @GET("api/peliculas")
-    Call<List<Pelicula>> getPeliculas(@Query("admin") boolean isAdmin, @Query("fecha") String fecha);
+    Call<List<Pelicula>> getPeliculas(@Header("Authorization") String token, @Query("admin") boolean isAdmin, @Query("fecha") String fecha);
 
     @POST("api/reservas")
     Call<ReservaResponse> crearReservaConButacas(@Header("Authorization") String token, @Body Map<String, Object> request);
@@ -48,15 +48,12 @@ public interface ApiService {
     @POST("api/escanear/{qr_code}")
     Call<ReservaResponse> escanearTicket(@Header("Authorization") String token, @Path("qr_code") String qrCode);
 
-    
-
     @GET("api/usuario/perfil")
     Call<Usuario> obtenerPerfil(@Header("Authorization") String token);
 
     @PUT("api/usuario/nombre")
     Call<ReservaResponse> cambiarNombre(@Header("Authorization") String token, @Body Map<String, String> body);
 
-    
     @PUT("api/usuario/password")
     Call<ReservaResponse> cambiarPassword(@Header("Authorization") String token, @Body Map<String, String> body);
 
@@ -68,8 +65,6 @@ public interface ApiService {
 
     @GET("api/usuario/historial")
     Call<List<Ticket>> obtenerHistorial(@Header("Authorization") String token);
-
-    
 
     @GET("api/sesiones/{id_sesion}/butacas")
     Call<List<Butaca>> getMapaButacas(@Header("Authorization") String token, @Path("id_sesion") int idSesion);
@@ -95,13 +90,14 @@ public interface ApiService {
     @DELETE("api/sesiones/{id}")
     Call<ReservaResponse> eliminarSesion(@Header("Authorization") String token, @Path("id") int idSesion);
 
-    
-
     @GET("api/salas")
     Call<List<Sala>> getSalas(@Header("Authorization") String token);
 
     @GET("api/salas")
     Call<List<Sala>> getSalas(@Header("Authorization") String token, @Query("cine_id") Integer cineId);
+
+    @GET("api/salas")
+    Call<List<Sala>> getSalasPorPelicula(@Header("Authorization") String token, @Query("pelicula_id") Integer peliculaId);
 
     @GET("api/admin/cine")
     Call<Map<String, Object>> getDatosCine(@Header("Authorization") String token);
@@ -126,8 +122,6 @@ public interface ApiService {
 
     @GET("api/cines")
     Call<List<Map<String, Object>>> getTodosLosCines();
-
-    
 
     @GET("api/superadmin/cines")
     Call<List<Cine>> getCinesSuperadmin(@Header("Authorization") String token);

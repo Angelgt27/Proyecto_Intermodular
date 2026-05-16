@@ -1,7 +1,5 @@
 package com.example.printergrado.viewmodel;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -21,8 +19,6 @@ import retrofit2.Response;
 
 public class MainViewModel extends ViewModel {
 
-    
-
     private final MutableLiveData<List<Pelicula>> peliculasLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<Ticket>> ticketsLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> mensajeLiveData = new MutableLiveData<>();
@@ -33,22 +29,20 @@ public class MainViewModel extends ViewModel {
     public LiveData<List<Ticket>> getTickets() { return ticketsLiveData; }
     public LiveData<String> getMensajes() { return mensajeLiveData; }
 
-    public void cargarPeliculas(boolean isAdmin, String fecha) {
-        Log.d("DEPURACION", "1. Pidiendo películas. Admin: " + isAdmin + " | Fecha: " + fecha);
-
-        apiService.getPeliculas(isAdmin, fecha).enqueue(new Callback<List<Pelicula>>() {
+    public void cargarPeliculas(String token, boolean isAdmin, String fecha) {
+        apiService.getPeliculas(token, isAdmin, fecha).enqueue(new Callback<List<Pelicula>>() {
             @Override
             public void onResponse(Call<List<Pelicula>> call, Response<List<Pelicula>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     peliculasLiveData.postValue(response.body());
                 } else {
-                    mensajeLiveData.postValue("Error del servidor al buscar películas");
+                    mensajeLiveData.postValue("Error del servidor al buscar peliculas");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Pelicula>> call, Throwable t) {
-                mensajeLiveData.postValue("Error de conexión crítico.");
+                mensajeLiveData.postValue("Error de conexion critico.");
             }
         });
     }
@@ -60,17 +54,13 @@ public class MainViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     ticketsLiveData.setValue(response.body());
                 } else {
-                    
-
                     ticketsLiveData.setValue(new ArrayList<>());
                 }
             }
             @Override
             public void onFailure(Call<List<Ticket>> call, Throwable t) {
-                
-
                 ticketsLiveData.setValue(new ArrayList<>());
-                mensajeLiveData.setValue("Problema de conexión al buscar entradas");
+                mensajeLiveData.setValue("Problema de conexion al buscar entradas");
             }
         });
     }
@@ -81,8 +71,7 @@ public class MainViewModel extends ViewModel {
             public void onResponse(Call<ReservaResponse> call, Response<ReservaResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     mensajeLiveData.setValue(response.body().getMensaje());
-                    cargarTickets(token); 
-
+                    cargarTickets(token);
                 }
             }
             @Override
@@ -104,7 +93,7 @@ public class MainViewModel extends ViewModel {
             }
             @Override
             public void onFailure(Call<ReservaResponse> call, Throwable t) {
-                mensajeLiveData.setValue("Error de conexión con el escáner");
+                mensajeLiveData.setValue("Error de conexion con el escaner");
             }
         });
     }

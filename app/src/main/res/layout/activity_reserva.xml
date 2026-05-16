@@ -119,7 +119,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="1. Selecciona un Cine"
+                android:hint="Cine: "
                 app:boxStrokeColor="@color/rojo_cine">
                 <AutoCompleteTextView
                     android:id="@+id/spinnerCine"
@@ -134,7 +134,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="2. Selecciona una Fecha"
+                android:hint="1. Selecciona una Fecha"
                 android:visibility="gone"
                 app:boxStrokeColor="@color/rojo_cine">
                 <AutoCompleteTextView
@@ -150,7 +150,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="3. Selecciona una Sesión"
+                android:hint="2. Selecciona una Sesión"
                 android:visibility="gone"
                 app:boxStrokeColor="@color/rojo_cine">
                 <AutoCompleteTextView
@@ -165,7 +165,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="4. Selecciona tus asientos:"
+                android:text="3. Selecciona tus asientos:"
                 android:textStyle="bold"
                 android:textColor="@color/negro"
                 android:visibility="gone"/>

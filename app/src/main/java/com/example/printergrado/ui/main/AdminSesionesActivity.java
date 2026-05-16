@@ -82,8 +82,6 @@ public class AdminSesionesActivity extends AppCompatActivity {
         tvTitulo.setText(tituloPelicula != null ? tituloPelicula : "Sesiones");
         findViewById(R.id.btnVolverSesiones).setOnClickListener(v -> finish());
 
-        
-
         etFiltroFecha = findViewById(R.id.etFiltroFechaSesiones);
         btnLimpiar = findViewById(R.id.btnLimpiarFiltroSesiones);
 
@@ -100,8 +98,6 @@ public class AdminSesionesActivity extends AppCompatActivity {
             etFiltroFecha.setText("");
             filtrarSesionesLocales(null);
         });
-
-        
 
         apiService = ApiClient.getClient().create(ApiService.class);
         SharedPreferences prefs = getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
@@ -128,8 +124,6 @@ public class AdminSesionesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Sesion>> call, Response<List<Sesion>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     listaSesionesOriginal = response.body();
-                    
-
                     String filtroActual = etFiltroFecha.getText().toString();
                     filtrarSesionesLocales(filtroActual.isEmpty() ? null : filtroActual);
                 }
@@ -151,7 +145,7 @@ public class AdminSesionesActivity extends AppCompatActivity {
     }
 
     private void cargarSalasDelCine() {
-        apiService.getSalas(token).enqueue(new Callback<List<Sala>>() {
+        apiService.getSalasPorPelicula(token, idPelicula).enqueue(new Callback<List<Sala>>() {
             @Override
             public void onResponse(Call<List<Sala>> call, Response<List<Sala>> response) {
                 if (response.isSuccessful() && response.body() != null) listaSalas = response.body();

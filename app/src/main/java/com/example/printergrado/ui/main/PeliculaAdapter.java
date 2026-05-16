@@ -46,15 +46,18 @@ public class PeliculaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private void construirListaDisplay() {
         listaDisplay.clear();
 
-        if ("Superadmin".equals(userRole)) {
+        if ("Admin".equals(userRole)) {
+            for (Pelicula p : listaPeliculasOriginal) {
+                listaDisplay.add(new ListItem(TYPE_PELICULA, null, p.getFkCine(), p));
+            }
+        } else {
             Map<Integer, List<Pelicula>> peliculasPorCine = new HashMap<>();
             Map<Integer, String> nombresRealesCines = new HashMap<>();
 
             for (Pelicula p : listaPeliculasOriginal) {
                 if (!peliculasPorCine.containsKey(p.getFkCine())) {
                     peliculasPorCine.put(p.getFkCine(), new ArrayList<>());
-                    nombresRealesCines.put(p.getFkCine(), p.getNombreCine()); 
-
+                    nombresRealesCines.put(p.getFkCine(), p.getNombreCine());
                 }
                 peliculasPorCine.get(p.getFkCine()).add(p);
             }
@@ -71,11 +74,8 @@ public class PeliculaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     }
                 }
             }
-        } else {
-            for (Pelicula p : listaPeliculasOriginal) {
-                listaDisplay.add(new ListItem(TYPE_PELICULA, null, p.getFkCine(), p));
-            }
         }
+
         notifyDataSetChanged();
     }
 

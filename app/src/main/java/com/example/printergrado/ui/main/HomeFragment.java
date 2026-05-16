@@ -29,6 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -54,6 +55,7 @@ public class HomeFragment extends Fragment {
 
     private boolean isAdmin = false;
     private boolean isSuperAdmin = false;
+    private String tokenGlobal;
 
     @Nullable
     @Override
@@ -70,6 +72,9 @@ public class HomeFragment extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences("CinePrefs", Context.MODE_PRIVATE);
         String rol = prefs.getString("rol", "Usuario");
+        String tokenGuardado = prefs.getString("jwt_token", null);
+        tokenGlobal = tokenGuardado != null ? "Bearer " + tokenGuardado : null;
+
         isAdmin = "Admin".equals(rol);
         isSuperAdmin = "Superadmin".equals(rol);
 
@@ -91,10 +96,10 @@ public class HomeFragment extends Fragment {
                         mapaCinesFiltro.put("Todos", -1);
 
                         for (Map<String, Object> c : response.body()) {
-                            String nombre = String.valueOf(c.get("nombre"));
+                            String name = String.valueOf(c.get("nombre"));
                             int id = ((Double) c.get("id_cine")).intValue();
-                            nombresCines.add(nombre);
-                            mapaCinesFiltro.put(nombre, id);
+                            nombresCines.add(name);
+                            mapaCinesFiltro.put(name, id);
                         }
 
                         if (getContext() != null) {
@@ -174,7 +179,7 @@ public class HomeFragment extends Fragment {
         if (fechaSeleccionada.isEmpty()) fechaSeleccionada = null;
 
         swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
-        mainViewModel.cargarPeliculas(isAdmin || isSuperAdmin, fechaSeleccionada);
+        mainViewModel.cargarPeliculas(tokenGlobal, isAdmin || isSuperAdmin, fechaSeleccionada);
     }
 
     private void filtrarPeliculas() {
@@ -197,6 +202,18 @@ public class HomeFragment extends Fragment {
                 listaFiltrada.add(pelicula);
             }
         }
+
+        Collections.sort(listaFiltrada, (p1, p2) -> {
+            int comparacionCine = Integer.compare(p1.getFkCine(), p2.getFkCine());
+            if (comparacionCine != 0) {
+                return comparacionCine;
+            }
+            if (p1.getTitulo() != null && p2.getTitulo() != null) {
+                return p1.getTitulo().compareToIgnoreCase(p2.getTitulo());
+            }
+            return 0;
+        });
+
         adapter.setPeliculas(listaFiltrada);
     }
 }

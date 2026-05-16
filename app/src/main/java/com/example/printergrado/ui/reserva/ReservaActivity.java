@@ -52,7 +52,7 @@ public class ReservaActivity extends AppCompatActivity {
     private List<Sesion> todasLasSesiones = new ArrayList<>();
     private int idPelicula = 1;
     private int idSesionFinal = -1;
-    private double precioSesionActual = 0.0; 
+    private double precioSesionActual = 0.0;
     private ButacaAdapter butacaAdapter;
     private ReservaViewModel reservaViewModel;
 
@@ -113,12 +113,11 @@ public class ReservaActivity extends AppCompatActivity {
 
         reservaViewModel = new ViewModelProvider(this).get(ReservaViewModel.class);
 
-        
         reservaViewModel.getMensajeReserva().observe(this, mensaje -> {
             if (mensaje != null) {
                 Toast.makeText(ReservaActivity.this, mensaje, Toast.LENGTH_LONG).show();
                 btnComprar.setEnabled(true);
-                
+
                 if (butacaAdapter != null) {
                     int cant = butacaAdapter.getButacasSeleccionadas().size();
                     btnComprar.setText(String.format("Comprar %d entradas (%.2f €)", cant, cant * precioSesionActual));
@@ -144,7 +143,7 @@ public class ReservaActivity extends AppCompatActivity {
                     todasLasSesiones = response.body();
                     configurarSelectorCine();
                 } else {
-                    spinnerCine.setHint("No hay sesiones disponibles");
+                    spinnerCine.setText("No hay sesiones disponibles", false);
                     spinnerCine.setEnabled(false);
                 }
             }
@@ -153,18 +152,20 @@ public class ReservaActivity extends AppCompatActivity {
     }
 
     private void configurarSelectorCine() {
-        Set<String> cines = new HashSet<>();
-        for (Sesion s : todasLasSesiones) cines.add(s.getCine());
-        spinnerCine.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>(cines)));
-        spinnerCine.setOnItemClickListener((parent, view, position, id) -> {
-            String cineSel = (String) parent.getItemAtPosition(position);
-            spinnerFecha.setText("", false);
-            spinnerHora.setText("", false);
-            layoutHora.setVisibility(View.GONE);
-            ocultarMapa();
-            filtrarFechas(cineSel);
-            layoutFecha.setVisibility(View.VISIBLE);
-        });
+        if (todasLasSesiones.isEmpty()) return;
+
+        String cineSel = todasLasSesiones.get(0).getCine();
+
+        spinnerCine.setText(cineSel, false);
+        spinnerCine.setEnabled(false);
+
+        spinnerFecha.setText("", false);
+        spinnerHora.setText("", false);
+        layoutHora.setVisibility(View.GONE);
+        ocultarMapa();
+
+        filtrarFechas(cineSel);
+        layoutFecha.setVisibility(View.VISIBLE);
     }
 
     private void filtrarFechas(String cine) {
@@ -187,14 +188,14 @@ public class ReservaActivity extends AppCompatActivity {
         for (Sesion s : todasLasSesiones) {
             if (s.getCine().equals(cine) && s.getFecha().equals(fecha)) {
                 sesionesFinales.add(s);
-                horas.add(s.getHora() + " - " + s.getPrecio() + "€"); 
+                horas.add(s.getHora() + " - " + s.getPrecio() + "€");
             }
         }
         spinnerHora.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, horas));
 
         spinnerHora.setOnItemClickListener((parent, view, position, id) -> {
             idSesionFinal = sesionesFinales.get(position).getIdSesion();
-            precioSesionActual = sesionesFinales.get(position).getPrecio(); 
+            precioSesionActual = sesionesFinales.get(position).getPrecio();
             cargarMapaButacas(idSesionFinal);
         });
     }
@@ -270,7 +271,6 @@ public class ReservaActivity extends AppCompatActivity {
                         if (cantidad > 0) {
                             btnComprar.setEnabled(true);
                             btnComprar.setBackgroundColor(getResources().getColor(R.color.rojo_cine));
-                            
                             btnComprar.setText(String.format("Comprar %d entradas (%.2f €)", cantidad, cantidad * precioSesionActual));
                         } else {
                             btnComprar.setEnabled(false);
