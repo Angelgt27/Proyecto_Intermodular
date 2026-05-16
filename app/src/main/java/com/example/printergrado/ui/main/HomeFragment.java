@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -20,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.example.printergrado.R;
 import com.example.printergrado.data.api.ApiClient;
 import com.example.printergrado.data.api.ApiService;
@@ -29,14 +27,12 @@ import com.example.printergrado.viewmodel.MainViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,8 +44,7 @@ public class HomeFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private List<Pelicula> todasLasPeliculas = new ArrayList<>();
-    private Map<String, Integer> mapaCinesFiltro = new HashMap<>(); 
-
+    private Map<String, Integer> mapaCinesFiltro = new HashMap<>();
 
     private TextInputEditText etFiltroNombre;
     private TextInputEditText etFiltroFecha;
@@ -85,9 +80,7 @@ public class HomeFragment extends Fragment {
         adapter.setRole(rol);
         rv.setAdapter(adapter);
 
-        
-
-        if (isSuperAdmin) {
+        if (isSuperAdmin || !isAdmin) {
             ApiService apiService = ApiClient.getClient().create(ApiService.class);
             apiService.getTodosLosCines().enqueue(new Callback<List<Map<String, Object>>>() {
                 @Override
@@ -104,9 +97,11 @@ public class HomeFragment extends Fragment {
                             mapaCinesFiltro.put(nombre, id);
                         }
 
-                        ArrayAdapter<String> adapterCines = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, nombresCines);
-                        spinnerFiltroCine.setAdapter(adapterCines);
-                        spinnerFiltroCine.setText("Todos", false);
+                        if (getContext() != null) {
+                            ArrayAdapter<String> adapterCines = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, nombresCines);
+                            spinnerFiltroCine.setAdapter(adapterCines);
+                            spinnerFiltroCine.setText("Todos", false);
+                        }
                     }
                 }
                 @Override public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
@@ -133,7 +128,7 @@ public class HomeFragment extends Fragment {
         btnLimpiarFiltros.setOnClickListener(v -> {
             etFiltroNombre.setText("");
             etFiltroFecha.setText("");
-            if (isSuperAdmin) spinnerFiltroCine.setText("Todos", false);
+            if (isSuperAdmin || !isAdmin) spinnerFiltroCine.setText("Todos", false);
             aplicarFiltroDeRed();
         });
 
@@ -187,7 +182,7 @@ public class HomeFragment extends Fragment {
         String cineSeleccionado = spinnerFiltroCine.getText().toString();
 
         Integer cineId = null;
-        if (isSuperAdmin && mapaCinesFiltro.containsKey(cineSeleccionado)) {
+        if ((isSuperAdmin || !isAdmin) && mapaCinesFiltro.containsKey(cineSeleccionado)) {
             int id = mapaCinesFiltro.get(cineSeleccionado);
             if (id != -1) cineId = id;
         }
