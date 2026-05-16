@@ -3,15 +3,13 @@ package com.example.printergrado.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
 import com.example.printergrado.data.api.ApiClient;
 import com.example.printergrado.data.api.ApiService;
 import com.example.printergrado.data.model.ReservaResponse;
-
+import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,12 +23,7 @@ public class ReservaViewModel extends ViewModel {
     public LiveData<String> getMensajeReserva() { return mensajeReserva; }
     public LiveData<Boolean> getReservaExitosa() { return reservaExitosa; }
 
-    
-
     public void hacerReservaConButacas(String token, int idSesion, List<Integer> idsButacas) {
-
-        
-
         Map<String, Object> request = new HashMap<>();
         request.put("id_sesion", idSesion);
         request.put("ids_butacas", idsButacas);
@@ -42,13 +35,25 @@ public class ReservaViewModel extends ViewModel {
                     mensajeReserva.setValue(response.body().getMensaje());
                     reservaExitosa.setValue(true);
                 } else {
-                    mensajeReserva.setValue("Error al reservar. Puede que alguien haya comprado la butaca.");
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorString = response.errorBody().string();
+                            JSONObject jsonObject = new JSONObject(errorString);
+                            mensajeReserva.setValue(jsonObject.getString("error"));
+                        } else {
+                            mensajeReserva.setValue("Error desconocido al contactar con el servidor.");
+                        }
+                    } catch (Exception e) {
+                        mensajeReserva.setValue("Error al reservar. Puede que alguien haya comprado la butaca.");
+                    }
+                    reservaExitosa.setValue(false);
                 }
             }
 
             @Override
             public void onFailure(Call<ReservaResponse> call, Throwable t) {
-                mensajeReserva.setValue("Error de conexión: " + t.getMessage());
+                mensajeReserva.setValue("Error de conexion: " + t.getMessage());
+                reservaExitosa.setValue(false);
             }
         });
     }
